@@ -10,4 +10,6 @@ import java.util.List;
 public interface VmLogService extends PluggableService {
 
     ListResponse<VmLogResponse> listVmLogs(Long id, Date start, Date end, List<String> keywords);
+
+    void deleteVmLogs(String uuid);
 }

@@ -5,4 +5,8 @@
 
     <bean id="vmLogsServiceImpl" class="com.bwsw.cloudstack.vm.logs.VmLogServiceImpl"/>
 
+    <bean id="eventSubscriberFactory" class="com.bwsw.cloudstack.event.EventSubscriberFactoryImpl"/>
+
+    <bean id="vmLogEventSubscriber" factory-bean="eventSubscriberFactory" factory-method="getVmLogEventSubscriber"/>
+
 </beans>
