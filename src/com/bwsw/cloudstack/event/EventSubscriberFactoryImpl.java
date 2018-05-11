@@ -1,6 +1,6 @@
 package com.bwsw.cloudstack.event;
 
-import com.bwsw.cloudstack.vm.logs.VmLogService;
+import com.bwsw.cloudstack.vm.logs.VmLogManager;
 import org.apache.cloudstack.framework.events.EventBus;
 import org.apache.cloudstack.framework.events.EventBusException;
 import org.apache.cloudstack.framework.events.EventTopic;
@@ -13,10 +13,10 @@ public class EventSubscriberFactoryImpl implements EventSubscriberFactory {
     private EventBus _eventBus;
 
     @Inject
-    private VmLogService _vmLogService;
+    private VmLogManager _vmLogManager;
 
     public VmLogEventSubscriber getVmLogEventSubscriber() throws EventBusException {
-        VmLogEventSubscriber subscriber = new VmLogEventSubscriber(_vmLogService);
+        VmLogEventSubscriber subscriber = new VmLogEventSubscriber(_vmLogManager);
         EventTopic eventTopic = new EventTopic(VmLogEventSubscriber.getEventCategory().getName(), VmLogEventSubscriber.getEventType(), null, null, null);
         _eventBus.subscribe(eventTopic, subscriber);
         return subscriber;

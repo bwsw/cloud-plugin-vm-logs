@@ -1,6 +1,6 @@
 package com.bwsw.cloudstack.event;
 
-import com.bwsw.cloudstack.vm.logs.VmLogService;
+import com.bwsw.cloudstack.vm.logs.VmLogManager;
 import com.cloud.event.EventCategory;
 import com.cloud.event.EventTypes;
 import com.cloud.vm.VirtualMachine;
@@ -15,15 +15,15 @@ import java.util.Map;
 
 public class VmLogEventSubscriber implements EventSubscriber {
 
-    private final VmLogService _vmLogService;
+    private final VmLogManager _vmLogManager;
     private final Gson _gson;
     private final Type _mapType;
 
-    public VmLogEventSubscriber(VmLogService vmLogService) {
-        if (vmLogService == null) {
+    public VmLogEventSubscriber(VmLogManager vmLogManager) {
+        if (vmLogManager == null) {
             throw new IllegalArgumentException("Null VmLogService");
         }
-        _vmLogService = vmLogService;
+        _vmLogManager = vmLogManager;
         _gson = new Gson();
         _mapType = new TypeToken<Map<String, String>>() {
         }.getType();
@@ -61,7 +61,7 @@ public class VmLogEventSubscriber implements EventSubscriber {
 
             }
             if (execute) {
-                _vmLogService.deleteVmLogs(event.getResourceUUID());
+                _vmLogManager.deleteVmLogs(event.getResourceUUID());
             }
         }
     }

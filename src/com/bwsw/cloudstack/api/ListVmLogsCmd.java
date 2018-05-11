@@ -1,7 +1,7 @@
 package com.bwsw.cloudstack.api;
 
 import com.bwsw.cloudstack.response.VmLogResponse;
-import com.bwsw.cloudstack.vm.logs.VmLogService;
+import com.bwsw.cloudstack.vm.logs.VmLogManager;
 import com.cloud.exception.ConcurrentOperationException;
 import com.cloud.user.Account;
 import com.cloud.uservm.UserVm;
@@ -44,7 +44,7 @@ public class ListVmLogsCmd extends BaseListCmd {
     private List<String> keywords;
 
     @Inject
-    private VmLogService _vmLogService;
+    private VmLogManager _vmLogManager;
 
     public Long getId() {
         return id;
@@ -75,7 +75,7 @@ public class ListVmLogsCmd extends BaseListCmd {
 
     @Override
     public void execute() throws ServerApiException, ConcurrentOperationException {
-        com.bwsw.cloudstack.response.ListResponse<VmLogResponse> vmLogs = _vmLogService.listVmLogs(getId(), getStartDate(), getEndDate(), getKeywords());
+        com.bwsw.cloudstack.response.ListResponse<VmLogResponse> vmLogs = _vmLogManager.listVmLogs(getId(), getStartDate(), getEndDate(), getKeywords());
         ListResponse<VmLogResponse> response = new ListResponse<>();
         response.setResponseName(getCommandName());
         response.setObjectName("logs");

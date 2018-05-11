@@ -3,19 +3,24 @@ package com.bwsw.cloudstack.vm.logs;
 import com.bwsw.cloudstack.api.ListVmLogsCmd;
 import com.bwsw.cloudstack.response.ListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
+import com.cloud.utils.component.ComponentLifecycleBase;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
+import org.apache.cloudstack.framework.config.ConfigKey;
+import org.apache.cloudstack.framework.config.Configurable;
 import org.apache.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.naming.ConfigurationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-public class VmLogServiceImpl implements VmLogService {
+public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogManager, Configurable {
 
-    private static final Logger s_logger = Logger.getLogger(VmLogServiceImpl.class);
+    private static final Logger s_logger = Logger.getLogger(VmLogManagerImpl.class);
 
     @Inject
     private VMInstanceDao _vmInstanceDao;
@@ -53,4 +58,20 @@ public class VmLogServiceImpl implements VmLogService {
             s_logger.error("Can not delete logs for unknown VM " + uuid);
         }
     }
+
+    @Override
+    public boolean configure(String name, Map<String, Object> params) throws ConfigurationException {
+        return true;
+    }
+
+    @Override
+    public String getConfigComponentName() {
+        return VmLogManager.class.getSimpleName();
+    }
+
+    @Override
+    public ConfigKey<?>[] getConfigKeys() {
+        return new ConfigKey<?>[] {VmLogElasticSearchList};
+    }
+
 }
