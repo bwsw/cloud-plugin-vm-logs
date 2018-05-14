@@ -1,0 +1,1 @@
+{"bool":{"filter":[{"range":{"message":{"from":null,"to":"2018-05-31T12:00:00.000Z","include_lower":true,"include_upper":false,"boost":1.0}}}],"adjust_pure_negative":true,"boost":1.0}}

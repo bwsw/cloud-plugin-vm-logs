@@ -3,15 +3,18 @@ package com.bwsw.cloudstack.vm.logs;
 import com.bwsw.cloudstack.api.ListVmLogsCmd;
 import com.bwsw.cloudstack.response.ListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
 import com.cloud.utils.component.ComponentLifecycleBase;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
 import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.Configurable;
+import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 
 import javax.inject.Inject;
-import javax.naming.ConfigurationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -24,6 +27,8 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     @Inject
     private VMInstanceDao _vmInstanceDao;
+
+    private RestHighLevelClient _restHighLevelClient;
 
     @Override
     public List<Class<?>> getCommands() {
@@ -60,7 +65,13 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
-    public boolean configure(String name, Map<String, Object> params) throws ConfigurationException {
+    public boolean configure(String name, Map<String, Object> params) {
+        try {
+            _restHighLevelClient = new RestHighLevelClient(RestClient.builder(HttpUtils.getHttpHosts(VmLogElasticSearchList.value()).toArray(new HttpHost[] {})));
+        } catch (IllegalArgumentException e) {
+            s_logger.error("Failed to create ElasticSearch client", e);
+            return false;
+        }
         return true;
     }
 
