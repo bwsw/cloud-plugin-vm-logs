@@ -33,7 +33,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
-    public ListResponse<VmLogResponse> listVmLogs(Long id, Date start, Date end, List<String> keywords) {
+    public ListResponse<VmLogResponse> listVmLogs(Long id, Date start, Date end, List<String> keywords, String logFile) {
         List<VmLogResponse> logs;
 
         VMInstanceVO vmInstanceVO = _vmInstanceDao.findById(id);

@@ -43,6 +43,8 @@ public class ListVmLogsCmd extends BaseListCmd {
     @Parameter(name = "keywords", type = CommandType.LIST, collectionType = CommandType.STRING, description = "keywords to search VM logs")
     private List<String> keywords;
 
+    @Parameter(name = "logFile", type = CommandType.STRING, description = "the log file to search VM logs")
+    private String logFile;
     @Inject
     private VmLogManager _vmLogManager;
 
@@ -75,7 +77,7 @@ public class ListVmLogsCmd extends BaseListCmd {
 
     @Override
     public void execute() throws ServerApiException, ConcurrentOperationException {
-        com.bwsw.cloudstack.response.ListResponse<VmLogResponse> vmLogs = _vmLogManager.listVmLogs(getId(), getStartDate(), getEndDate(), getKeywords());
+        com.bwsw.cloudstack.response.ListResponse<VmLogResponse> vmLogs = _vmLogManager.listVmLogs(getId(), getStartDate(), getEndDate(), getKeywords(), logFile);
         ListResponse<VmLogResponse> response = new ListResponse<>();
         response.setResponseName(getCommandName());
         response.setObjectName("logs");

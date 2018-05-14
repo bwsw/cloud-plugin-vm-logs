@@ -13,7 +13,7 @@ public interface VmLogManager extends PluggableService {
     ConfigKey<String> VmLogElasticSearchList = new ConfigKey<>("Advanced", String.class, "vm.log.elasticsearch.list", null,
             "Comma separated list of ElasticSearch HTTP hosts; e.g. http://localhost,http://localhost:9201", false);
 
-    ListResponse<VmLogResponse> listVmLogs(Long id, Date start, Date end, List<String> keywords);
+    ListResponse<VmLogResponse> listVmLogs(Long id, Date start, Date end, List<String> keywords, String logFile);
 
     void deleteVmLogs(String uuid);
 }
