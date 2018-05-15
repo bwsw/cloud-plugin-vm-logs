@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 @RunWith(DataProviderRunner.class)
-public class VmLogQueryBuilderImplTest {
+public class VmLogRequestBuilderImplTest {
 
     @DataProvider
     public static Object[][] filters() {
@@ -41,11 +41,11 @@ public class VmLogQueryBuilderImplTest {
     private static final String[] FIELDS = new String[] {"source", "message", "@timestamp"};
     private static final String[] EXCLUDED_FIELDS = {};
 
-    private VmLogQueryBuilderImpl vmLogQueryBuilder = new VmLogQueryBuilderImpl();
+    private VmLogRequestBuilderImpl vmLogQueryBuilder = new VmLogRequestBuilderImpl();
 
     @Test
     public void testGetSearchQueryBasicRequest() {
-        SearchRequest searchRequest = vmLogQueryBuilder.getSearchQuery(UUID, PAGE_SIZE, null, null, null, null);
+        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE_SIZE, null, null, null, null);
 
         checkCommonSettings(searchRequest, PAGE_SIZE);
         assertNull(searchRequest.source().query());
@@ -54,7 +54,7 @@ public class VmLogQueryBuilderImplTest {
     @Test
     @UseDataProvider("filters")
     public void testGetSearchQueryFilters(LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, String resultFile) throws IOException {
-        SearchRequest searchRequest = vmLogQueryBuilder.getSearchQuery(UUID, PAGE_SIZE, start, end, keywords, logFile);
+        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE_SIZE, start, end, keywords, logFile);
 
         checkCommonSettings(searchRequest, PAGE_SIZE);
 

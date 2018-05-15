@@ -4,15 +4,15 @@ import java.util.List;
 
 public class ListResponse<T> {
 
-    private final int count;
+    private final long count;
     private final List<T> items;
 
-    public ListResponse(int count, List<T> items) {
+    public ListResponse(long count, List<T> items) {
         this.count = count;
         this.items = items;
     }
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 

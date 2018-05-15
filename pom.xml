@@ -16,6 +16,7 @@
 
     <properties>
         <elasticsearch.version>6.2.4</elasticsearch.version>
+        <jackson.version>2.9.5</jackson.version>
     </properties>
 
     <dependencies>
@@ -23,6 +24,16 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.tngtech.java</groupId>
