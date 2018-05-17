@@ -1,7 +1,10 @@
 package com.bwsw.cloudstack.api;
 
+import com.bwsw.cloudstack.response.ScrollableListResponse;
+import com.bwsw.cloudstack.response.VmLogListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.bwsw.cloudstack.vm.logs.VmLogManager;
+import com.bwsw.cloudstack.vm.logs.util.ParameterUtils;
 import com.cloud.exception.ConcurrentOperationException;
 import com.cloud.user.Account;
 import com.cloud.uservm.UserVm;
@@ -14,25 +17,26 @@ import org.apache.cloudstack.api.APICommand;
 import org.apache.cloudstack.api.ApiConstants;
 import org.apache.cloudstack.api.ApiErrorCode;
 import org.apache.cloudstack.api.BaseCmd;
-import org.apache.cloudstack.api.BaseListCmd;
 import org.apache.cloudstack.api.Parameter;
 import org.apache.cloudstack.api.ResponseObject;
 import org.apache.cloudstack.api.ServerApiException;
-import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.api.response.UserVmResponse;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-@APICommand(name = ListVmLogsCmd.API_NAME, description = "Lists VM logs", responseObject = VmLogResponse.class, requestHasSensitiveInfo = false, responseHasSensitiveInfo = true,
+@APICommand(name = ListVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = ScrollableListResponse.class, requestHasSensitiveInfo = false,
+        responseHasSensitiveInfo = true,
         responseView = ResponseObject.ResponseView.Full, authorized = {RoleType.Admin, RoleType.ResourceAdmin, RoleType.DomainAdmin, RoleType.User},
         entityType = {VirtualMachine.class})
-public class ListVmLogsCmd extends BaseListCmd {
+public class ListVmLogsCmd extends BaseCmd {
 
-    public static final String API_NAME = "listVmLogs";
+    public static final String API_NAME = "getVmLogs";
+    private static final String SEARCH_AFTER_PARAM = "searchafter";
 
     @ACL(accessType = SecurityChecker.AccessType.OperateEntry)
     @Parameter(name = ApiConstants.ID, type = CommandType.UUID, entityType = UserVmResponse.class, required = true, description = "the ID of the virtual machine")
@@ -49,6 +53,16 @@ public class ListVmLogsCmd extends BaseListCmd {
 
     @Parameter(name = "logFile", type = CommandType.STRING, description = "the log file to search VM logs")
     private String logFile;
+
+    @Parameter(name = ApiConstants.PAGE, type = CommandType.INTEGER)
+    private Integer page;
+
+    @Parameter(name = ApiConstants.PAGE_SIZE, type = CommandType.INTEGER)
+    private Integer pageSize;
+
+    @Parameter(name = SEARCH_AFTER_PARAM, type = CommandType.STRING, description = "the scroll id to retrieve next log page")
+    private String searchAfter;
+
     @Inject
     private VmLogManager _vmLogManager;
 
@@ -68,6 +82,22 @@ public class ListVmLogsCmd extends BaseListCmd {
         return keywords;
     }
 
+    public String getLogFile() {
+        return logFile;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public String getSearchAfter() {
+        return searchAfter;
+    }
+
     @Override
     public long getEntityOwnerId() {
         UserVm vm = _responseGenerator.findUserVmById(getId());
@@ -81,12 +111,21 @@ public class ListVmLogsCmd extends BaseListCmd {
 
     @Override
     public void execute() throws ServerApiException, ConcurrentOperationException {
-        com.bwsw.cloudstack.response.ListResponse<VmLogResponse> vmLogs = _vmLogManager
-                .listVmLogs(getId(), parseDate(getStartDate(), ApiConstants.START_DATE), parseDate(getEndDate(), ApiConstants.END_DATE), getKeywords(), logFile, getPage(),
-                        getPageSize());
-        ListResponse<VmLogResponse> response = new ListResponse<>();
+        ScrollableListResponse<VmLogResponse> listResponse = _vmLogManager
+                .listVmLogs(getId(), parseDate(getStartDate(), ApiConstants.START_DATE), parseDate(getEndDate(), ApiConstants.END_DATE), getKeywords(), getLogFile(), getPage(),
+                        getPageSize(), getSearchAfterValue());
+        VmLogListResponse response;
+        if (RESPONSE_TYPE_JSON.equals(getResponseType())) {
+            VmLogResponse[] logs = new VmLogResponse[0];
+            if (listResponse.getItems() != null) {
+                logs = listResponse.getItems().toArray(logs);
+            }
+            response = new VmLogListResponse(listResponse.getCount(), logs, listResponse.getSearchAfter());
+        } else {
+            response = new VmLogListResponse(listResponse.getCount(), listResponse.getItems(), listResponse.getSearchAfter());
+        }
         response.setResponseName(getCommandName());
-        response.setResponses(vmLogs.getItems(), (int)vmLogs.getCount());
+        response.setObjectName("vmlogs");
         setResponseObject(response);
     }
 
@@ -103,6 +142,14 @@ public class ListVmLogsCmd extends BaseListCmd {
             return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
             throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
+        }
+    }
+
+    private Object[] getSearchAfterValue() {
+        try {
+            return ParameterUtils.readSearchAfter(getSearchAfter());
+        } catch (IOException e) {
+            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + SEARCH_AFTER_PARAM + "\" parameter is invalid");
         }
     }
 }

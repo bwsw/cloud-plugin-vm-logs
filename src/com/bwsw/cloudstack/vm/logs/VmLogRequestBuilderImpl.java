@@ -2,12 +2,12 @@ package com.bwsw.cloudstack.vm.logs;
 
 import com.google.common.base.Strings;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchScrollRequest;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,18 +17,24 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
 
     private static final String INDEX_PREFIX = "vmlog-";
     private static final String INDEX_SUFFIX = "-*";
+    private static final String ID_FIELD = "_id";
     private static final String[] FIELDS = new String[] {LOG_FILE_FIELD, DATA_FIELD, DATE_FIELD};
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    private static final TimeValue SCROLL_TIMEOUT = TimeValue.timeValueMillis(30000);
 
     @Override
-    public SearchRequest getLogSearchRequest(String vmUuid, int pageSize, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile) {
+    public SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Object[] searchAfter, LocalDateTime start, LocalDateTime end, List<String> keywords,
+            String logFile) {
         SearchRequest request = new SearchRequest(getIndex(vmUuid));
-        request.scroll(SCROLL_TIMEOUT);
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.size(pageSize);
         sourceBuilder.fetchSource(FIELDS, null);
+        sourceBuilder.size(pageSize);
+
+        if (searchAfter != null) {
+            sourceBuilder.searchAfter(searchAfter);
+        } else {
+            sourceBuilder.from((page - 1) * pageSize + 1);
+        }
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (start != null || end != null) {
@@ -51,16 +57,11 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
         if (queryBuilder.hasClauses()) {
             sourceBuilder.query(queryBuilder);
         }
+        sourceBuilder.sort(new FieldSortBuilder(DATE_FIELD).order(SortOrder.ASC));
+        sourceBuilder.sort(new FieldSortBuilder(ID_FIELD).order(SortOrder.ASC));
 
         request.source(sourceBuilder);
         return request;
-    }
-
-    @Override
-    public SearchScrollRequest getSearchScrollRequest(String scrollId) {
-        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
-        scrollRequest.scroll(SCROLL_TIMEOUT);
-        return scrollRequest;
     }
 
     private String getIndex(String vmUuid) {

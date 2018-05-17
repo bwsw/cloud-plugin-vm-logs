@@ -1,9 +1,11 @@
 package com.bwsw.cloudstack.vm.logs;
 
-import com.bwsw.cloudstack.response.ListResponse;
+import com.bwsw.cloudstack.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.util.ParameterUtils;
+import com.cloud.utils.exception.CloudRuntimeException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.cloudstack.api.ApiErrorCode;
-import org.apache.cloudstack.api.ServerApiException;
+import org.apache.cloudstack.api.ResponseObject;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -23,19 +25,12 @@ public class VmLogFetcherImpl implements VmLogFetcher {
     private final ObjectMapper _objectMapper = new ObjectMapper();
 
     @Override
-    public <T> ListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, long page, Class<T> elementClass) throws IOException {
+    public <T extends ResponseObject> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass, boolean scroll) throws IOException {
         SearchResponse response = client.search(request);
         if (response.status() != RestStatus.OK || response.getHits() == null) {
-            throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM logs");
+            throw new CloudRuntimeException("Failed to retrieve VM logs");
         }
-        if (page > 0) {
-            int currentPage = 1;
-            do {
-                currentPage++;
-                response = client.searchScroll(_vmLogRequestBuilder.getSearchScrollRequest(response.getScrollId()));
-            } while (currentPage < page && response.getHits().getHits().length != 0);
-        }
-        return new ListResponse<>(response.getHits().getTotalHits(), parseResults(response, elementClass));
+        return new ScrollableListResponse<>((int)response.getHits().getTotalHits(), parseResults(response, elementClass), getScrollId(response, scroll));
     }
 
     private <T> List<T> parseResults(SearchResponse response, Class<T> elementClass) throws IOException {
@@ -44,6 +39,17 @@ public class VmLogFetcherImpl implements VmLogFetcher {
             results.add(_objectMapper.readValue(searchHit.getSourceAsString(), elementClass));
         }
         return results;
+    }
+
+    private String getScrollId(SearchResponse response, boolean scroll) throws JsonProcessingException {
+        if (!scroll) {
+            return null;
+        }
+        int hits = response.getHits().getHits().length;
+        if (hits == 0) {
+            return null;
+        }
+        return ParameterUtils.writeSearchAfter(response.getHits().getHits()[hits - 1].getSortValues());
     }
 
 }

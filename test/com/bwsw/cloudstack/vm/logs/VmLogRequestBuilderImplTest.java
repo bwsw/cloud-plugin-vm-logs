@@ -38,6 +38,7 @@ public class VmLogRequestBuilderImplTest {
 
     private static final String UUID = "uuid";
     private static final int PAGE_SIZE = 15;
+    private static final int PAGE = 1;
     private static final String[] FIELDS = new String[] {"source", "message", "@timestamp"};
     private static final String[] EXCLUDED_FIELDS = {};
 
@@ -45,16 +46,17 @@ public class VmLogRequestBuilderImplTest {
 
     @Test
     public void testGetSearchQueryBasicRequest() {
-        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE_SIZE, null, null, null, null);
+        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, null, null, null, null);
 
         checkCommonSettings(searchRequest, PAGE_SIZE);
+        assertEquals(PAGE, searchRequest.source().from());
         assertNull(searchRequest.source().query());
     }
 
     @Test
     @UseDataProvider("filters")
     public void testGetSearchQueryFilters(LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, String resultFile) throws IOException {
-        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE_SIZE, start, end, keywords, logFile);
+        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, start, end, keywords, logFile);
 
         checkCommonSettings(searchRequest, PAGE_SIZE);
 

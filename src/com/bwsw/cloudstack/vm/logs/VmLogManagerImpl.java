@@ -1,7 +1,7 @@
 package com.bwsw.cloudstack.vm.logs;
 
 import com.bwsw.cloudstack.api.ListVmLogsCmd;
-import com.bwsw.cloudstack.response.ListResponse;
+import com.bwsw.cloudstack.response.ScrollableListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
 import com.cloud.exception.InvalidParameterValueException;
@@ -47,13 +47,13 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
-    public ListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize) {
+    public ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize,
+            Object[] searchAfter) {
         if (pageSize == null) {
             pageSize = VmLogDefaultPageSize.value();
         }
-        Integer maxPageSize = VmLogMaxPageSize.value();
-        if (pageSize == null || pageSize <= 0 || maxPageSize == null || pageSize > maxPageSize) {
-            throw new InvalidParameterValueException("Invalid page size ");
+        if (pageSize == null || pageSize < 1) {
+            throw new InvalidParameterValueException("Invalid page size");
         }
         if (page == null) {
             page = 1;
@@ -68,9 +68,9 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         if (vmInstanceVO == null) {
             throw new InvalidParameterValueException("Unable to find a virtual machine with specified id");
         }
-        SearchRequest searchRequest = _vmLogRequestBuilder.getLogSearchRequest(vmInstanceVO.getUuid(), pageSize, start, end, keywords, logFile);
+        SearchRequest searchRequest = _vmLogRequestBuilder.getLogSearchRequest(vmInstanceVO.getUuid(), page, pageSize, searchAfter, start, end, keywords, logFile);
         try {
-            return _vmLogFetcher.fetch(_restHighLevelClient, searchRequest, page, VmLogResponse.class);
+            return _vmLogFetcher.fetch(_restHighLevelClient, searchRequest, VmLogResponse.class, true);
         } catch (Exception e) {
             s_logger.error("Unable to retrieve VM logs", e);
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM logs");

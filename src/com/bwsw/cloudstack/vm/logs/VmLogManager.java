@@ -1,6 +1,6 @@
 package com.bwsw.cloudstack.vm.logs;
 
-import com.bwsw.cloudstack.response.ListResponse;
+import com.bwsw.cloudstack.response.ScrollableListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.cloud.utils.component.PluggableService;
 import org.apache.cloudstack.framework.config.ConfigKey;
@@ -17,7 +17,8 @@ public interface VmLogManager extends PluggableService {
 
     ConfigKey<Integer> VmLogMaxPageSize = new ConfigKey<>("Advanced", Integer.class, "vm.log.page.size.max", "1000", "Maximum page size for VM log listing", true);
 
-    ListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize);
+    ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize,
+            Object[] searchAfter);
 
     void deleteVmLogs(String uuid);
 }
