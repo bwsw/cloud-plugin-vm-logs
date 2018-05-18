@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-@APICommand(name = ListVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = ScrollableListResponse.class, requestHasSensitiveInfo = false,
+@APICommand(name = ListVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = VmLogListResponse.class, requestHasSensitiveInfo = false,
         responseHasSensitiveInfo = true,
         responseView = ResponseObject.ResponseView.Full, authorized = {RoleType.Admin, RoleType.ResourceAdmin, RoleType.DomainAdmin, RoleType.User},
         entityType = {VirtualMachine.class})
