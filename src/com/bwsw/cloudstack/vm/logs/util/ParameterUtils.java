@@ -17,14 +17,19 @@
 
 package com.bwsw.cloudstack.vm.logs.util;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.cloudstack.api.ApiErrorCode;
+import org.apache.cloudstack.api.ServerApiException;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class ParameterUtils {
 
-    private final static ObjectMapper s_objectMapper = new ObjectMapper();
+    private static final ObjectMapper s_objectMapper = new ObjectMapper();
 
     public static String convertToJson(Object[] objects) throws JsonProcessingException {
         if (objects == null) {
@@ -38,5 +43,16 @@ public class ParameterUtils {
             return null;
         }
         return s_objectMapper.readValue(json, Object[].class);
+    }
+
+    public static LocalDateTime parseDate(String date, String paramName) throws DateTimeParseException {
+        if (date == null) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
+        }
     }
 }

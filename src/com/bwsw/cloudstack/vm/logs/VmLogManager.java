@@ -18,8 +18,10 @@
 package com.bwsw.cloudstack.vm.logs;
 
 import com.bwsw.cloudstack.response.ScrollableListResponse;
+import com.bwsw.cloudstack.response.VmLogFileResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.cloud.utils.component.PluggableService;
+import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.framework.config.ConfigKey;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,8 @@ public interface VmLogManager extends PluggableService {
 
     ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize,
             Object[] searchAfter);
+
+    ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize);
 
     void deleteVmLogs(String uuid);
 }

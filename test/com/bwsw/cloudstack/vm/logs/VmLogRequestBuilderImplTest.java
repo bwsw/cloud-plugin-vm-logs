@@ -17,16 +17,19 @@
 
 package com.bwsw.cloudstack.vm.logs;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregatorFactories;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -35,13 +38,15 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.google.common.collect.ImmutableList;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -59,6 +64,13 @@ public class VmLogRequestBuilderImplTest {
                         "complex-vm-log-query.json"}};
     }
 
+    @DataProvider
+    public static Object[][] logFileFilters() {
+        return new Object[][] {{LocalDateTime.of(2018, 5, 1, 10, 0, 0), null, "start-date-vm-log-file-query.json"},
+                {null, LocalDateTime.of(2018, 5, 31, 12, 0, 0), "end-date-vm-log-file-query.json"},
+                {LocalDateTime.of(2018, 5, 1, 0, 0, 0), LocalDateTime.of(2018, 5, 31, 23, 59, 59), "complex-vm-log-file-query.json"}};
+    }
+
     private static final String UUID = "uuid";
     private static final int PAGE_SIZE = 15;
     private static final int PAGE = 1;
@@ -66,23 +78,25 @@ public class VmLogRequestBuilderImplTest {
     private static final String[] EXCLUDED_FIELDS = {};
     private static final Object[] SEARCH_AFTER = {12345, "text"};
     private static final String[] SORT_FIELDS = {VmLogRequestBuilder.DATE_FIELD, "_id"};
+    private static final Map<String, Object> AGGREGATE_AFTER = ImmutableMap.of("source", "file.log");
+    private static final ObjectMapper s_objectMapper = new ObjectMapper();
 
-    private VmLogRequestBuilderImpl vmLogQueryBuilder = new VmLogRequestBuilderImpl();
+    private VmLogRequestBuilderImpl _vmLogQueryBuilder = new VmLogRequestBuilderImpl();
 
     @Test
     public void testGetSearchQueryBasicRequest() {
-        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, null, null, null, null);
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, null, null, null, null);
 
-        checkCommonSettings(searchRequest, PAGE_SIZE);
+        checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
         assertEquals(PAGE, searchRequest.source().from());
         assertNull(searchRequest.source().query());
     }
 
     @Test
     public void testGetSearchQuerySearchAfter() {
-        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, SEARCH_AFTER, null, null, null, null);
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, SEARCH_AFTER, null, null, null, null);
 
-        checkCommonSettings(searchRequest, PAGE_SIZE);
+        checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
         assertEquals(-1, searchRequest.source().from());
         assertArrayEquals(SEARCH_AFTER, searchRequest.source().searchAfter());
         assertNull(searchRequest.source().query());
@@ -91,14 +105,38 @@ public class VmLogRequestBuilderImplTest {
     @Test
     @UseDataProvider("filters")
     public void testGetSearchQueryFilters(LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, String resultFile) throws IOException {
-        SearchRequest searchRequest = vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, start, end, keywords, logFile);
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, start, end, keywords, logFile);
 
-        checkCommonSettings(searchRequest, PAGE_SIZE);
+        checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
 
         checkQuery(searchRequest, IOUtils.resourceToString(resultFile, Charset.defaultCharset(), this.getClass().getClassLoader()));
     }
 
-    private void checkCommonSettings(SearchRequest searchRequest, int pageSize) {
+    @Test
+    public void testGetLogFileSearchRequest() throws IOException {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogFileSearchRequest(UUID, PAGE_SIZE, null, null, null);
+
+        checkCommonLogFileQuerySettings(searchRequest, PAGE_SIZE, null);
+    }
+
+    @Test
+    @UseDataProvider("logFileFilters")
+    public void testGetLogFileSearchRequestFilters(LocalDateTime start, LocalDateTime end, String resultFile) throws IOException {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogFileSearchRequest(UUID, PAGE_SIZE, null, start, end);
+
+        checkCommonLogFileQuerySettings(searchRequest, PAGE_SIZE, null);
+
+        checkQuery(searchRequest, IOUtils.resourceToString(resultFile, Charset.defaultCharset(), this.getClass().getClassLoader()));
+    }
+
+    @Test
+    public void testGetLogFileSearchRequestAggregateAfter() throws IOException {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogFileSearchRequest(UUID, PAGE_SIZE, AGGREGATE_AFTER, null, null);
+
+        checkCommonLogFileQuerySettings(searchRequest, PAGE_SIZE, AGGREGATE_AFTER);
+    }
+
+    private void checkCommonSearchQuerySettings(SearchRequest searchRequest, int pageSize) {
         assertNotNull(searchRequest);
 
         assertArrayEquals(new String[] {"vmlog-" + UUID + "-*"}, searchRequest.indices());
@@ -124,6 +162,25 @@ public class VmLogRequestBuilderImplTest {
         }
     }
 
+    private void checkCommonLogFileQuerySettings(SearchRequest searchRequest, int pageSize, Map<String, Object> after) throws IOException {
+        assertNotNull(searchRequest);
+
+        assertArrayEquals(new String[] {"vmlog-" + UUID + "-*"}, searchRequest.indices());
+        SearchSourceBuilder searchSourceBuilder = searchRequest.source();
+        assertNotNull(searchSourceBuilder);
+        assertEquals(0, searchSourceBuilder.size());
+        assertFalse(searchSourceBuilder.trackTotalHits());
+
+        AggregatorFactories.Builder aggregations = searchSourceBuilder.aggregations();
+
+        List<AggregationBuilder> builders = aggregations.getAggregatorFactories();
+        assertNotNull(builders);
+        assertEquals(2, builders.size());
+        for (AggregationBuilder builder : builders) {
+            checkAggregation(builder, pageSize, after);
+        }
+    }
+
     private void checkQuery(SearchRequest searchRequest, String expectedQuery) throws IOException {
         QueryBuilder queryBuilder = searchRequest.source().query();
         assertNotNull(queryBuilder);
@@ -131,4 +188,18 @@ public class VmLogRequestBuilderImplTest {
         String query = queryBuilder.toXContent(XContentFactory.jsonBuilder(), ToXContent.EMPTY_PARAMS).string();
         assertEquals(expectedQuery.trim(), query);
     }
+
+    private void checkAggregation(AggregationBuilder aggregationBuilder, int pageSize, Map<String, Object> after) throws IOException {
+        assertNotNull(aggregationBuilder);
+
+        String expectedAggregation = IOUtils.resourceToString(aggregationBuilder.getName() + "-aggregation.json", Charset.defaultCharset(), this.getClass().getClassLoader());
+        expectedAggregation = expectedAggregation.replaceFirst("%PAGE_SIZE%", String.valueOf(pageSize));
+        String aggregationAfter = "";
+        if (after != null) {
+            aggregationAfter = ",\"after\":" + s_objectMapper.writeValueAsString(after);
+        }
+        expectedAggregation = expectedAggregation.replaceFirst("%AGGREGATE_AFTER%", aggregationAfter);
+        assertEquals(expectedAggregation.trim(), aggregationBuilder.toString());
+    }
+
 }

@@ -17,18 +17,19 @@
 
 package com.bwsw.cloudstack.vm.logs.util;
 
-import java.io.IOException;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.apache.cloudstack.api.ServerApiException;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -36,12 +37,24 @@ import static org.junit.Assert.assertEquals;
 @RunWith(DataProviderRunner.class)
 public class ParameterUtilsTest {
 
+    private final static String PARAM = "param";
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @DataProvider
     public static Object[][] jsonObjects() {
         return new Object[][] {{null, null}, {new Object[0], "[]"}, {new Object[] {12345, "text"}, "[12345,\"text\"]"}};
+    }
+
+    @DataProvider
+    public static Object[][] validDates() {
+        return new Object[][] {{null, null}, {"2018-05-01T15:01:02", LocalDateTime.of(2018, 5, 1, 15, 1, 2)}};
+    }
+
+    @DataProvider
+    public static Object[][] invalidDates() {
+        return new Object[][] {{""}, {"01-05-2018 15:01:02"}};
     }
 
     @Test
@@ -61,4 +74,19 @@ public class ParameterUtilsTest {
         expectedException.expect(JsonMappingException.class);
         ParameterUtils.parseFromJson("{\"a\"}");
     }
+
+    @Test
+    @UseDataProvider("validDates")
+    public void testParseDate(String value, LocalDateTime dateTime) {
+        assertEquals(dateTime, ParameterUtils.parseDate(value, PARAM));
+    }
+
+    @Test
+    @UseDataProvider("invalidDates")
+    public void testParseDateInvalidDates(String value) {
+        expectedException.expect(ServerApiException.class);
+        expectedException.expectMessage("\"" + PARAM + "\" parameter is invalid");
+        ParameterUtils.parseDate(value, PARAM);
+    }
+
 }
