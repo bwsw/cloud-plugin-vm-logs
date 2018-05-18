@@ -108,7 +108,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     @Override
     public ConfigKey<?>[] getConfigKeys() {
-        return new ConfigKey<?>[] {VmLogElasticSearchList, VmLogDefaultPageSize, VmLogMaxPageSize};
+        return new ConfigKey<?>[] {VmLogElasticSearchList, VmLogDefaultPageSize};
     }
 
 }
