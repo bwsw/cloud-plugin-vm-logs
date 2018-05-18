@@ -1,6 +1,6 @@
 package com.bwsw.cloudstack.vm.logs;
 
-import com.bwsw.cloudstack.api.ListVmLogsCmd;
+import com.bwsw.cloudstack.api.GetVmLogsCmd;
 import com.bwsw.cloudstack.response.ScrollableListResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
@@ -42,7 +42,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     @Override
     public List<Class<?>> getCommands() {
         List<Class<?>> commands = new ArrayList<>();
-        commands.add(ListVmLogsCmd.class);
+        commands.add(GetVmLogsCmd.class);
         return commands;
     }
 
