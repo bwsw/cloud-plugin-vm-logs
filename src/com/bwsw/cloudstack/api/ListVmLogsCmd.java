@@ -114,16 +114,8 @@ public class ListVmLogsCmd extends BaseCmd {
         ScrollableListResponse<VmLogResponse> listResponse = _vmLogManager
                 .listVmLogs(getId(), parseDate(getStartDate(), ApiConstants.START_DATE), parseDate(getEndDate(), ApiConstants.END_DATE), getKeywords(), getLogFile(), getPage(),
                         getPageSize(), getSearchAfterValue());
-        VmLogListResponse response;
-        if (RESPONSE_TYPE_JSON.equals(getResponseType())) {
-            VmLogResponse[] logs = new VmLogResponse[0];
-            if (listResponse.getItems() != null) {
-                logs = listResponse.getItems().toArray(logs);
-            }
-            response = new VmLogListResponse(listResponse.getCount(), logs, listResponse.getSearchAfter());
-        } else {
-            response = new VmLogListResponse(listResponse.getCount(), listResponse.getItems(), listResponse.getSearchAfter());
-        }
+        // recreate the response for serialization to exclude generic type lists
+        VmLogListResponse response = new VmLogListResponse(listResponse.getCount(), listResponse.getItems(), listResponse.getSearchAfter());
         response.setResponseName(getCommandName());
         response.setObjectName("vmlogs");
         setResponseObject(response);
