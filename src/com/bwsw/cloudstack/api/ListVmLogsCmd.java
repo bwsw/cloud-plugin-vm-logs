@@ -156,7 +156,7 @@ public class ListVmLogsCmd extends BaseCmd {
 
     private Object[] getSearchAfterValue() {
         try {
-            return ParameterUtils.readSearchAfter(getSearchAfter());
+            return ParameterUtils.parseFromJson(getSearchAfter());
         } catch (IOException e) {
             throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + SEARCH_AFTER_PARAM + "\" parameter is invalid");
         }

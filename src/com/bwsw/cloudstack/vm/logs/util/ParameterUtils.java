@@ -17,26 +17,26 @@
 
 package com.bwsw.cloudstack.vm.logs.util;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 
 public class ParameterUtils {
 
     private final static ObjectMapper s_objectMapper = new ObjectMapper();
 
-    public static String writeSearchAfter(Object[] sortValues) throws JsonProcessingException {
-        if (sortValues == null) {
+    public static String convertToJson(Object[] objects) throws JsonProcessingException {
+        if (objects == null) {
             return null;
         }
-        return s_objectMapper.writeValueAsString(sortValues);
+        return s_objectMapper.writeValueAsString(objects);
     }
 
-    public static Object[] readSearchAfter(String searchAfter) throws IOException {
-        if (searchAfter == null) {
+    public static Object[] parseFromJson(String json) throws IOException {
+        if (json == null) {
             return null;
         }
-        return s_objectMapper.readValue(searchAfter, Object[].class);
+        return s_objectMapper.readValue(json, Object[].class);
     }
 }

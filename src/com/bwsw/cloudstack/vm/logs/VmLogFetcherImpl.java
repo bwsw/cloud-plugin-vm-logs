@@ -66,7 +66,7 @@ public class VmLogFetcherImpl implements VmLogFetcher {
         if (hits == 0) {
             return null;
         }
-        return ParameterUtils.writeSearchAfter(response.getHits().getHits()[hits - 1].getSortValues());
+        return ParameterUtils.convertToJson(response.getHits().getHits()[hits - 1].getSortValues());
     }
 
 }
