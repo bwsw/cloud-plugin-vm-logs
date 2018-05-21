@@ -17,12 +17,9 @@
 
 package com.bwsw.cloudstack.response;
 
-import org.apache.cloudstack.api.BaseResponse;
-import org.apache.cloudstack.api.ResponseObject;
-
 import java.util.List;
 
-public class ScrollableListResponse<T extends ResponseObject> extends BaseResponse {
+public class ScrollableListResponse<T> {
 
     private final int count;
     private final String searchAfter;

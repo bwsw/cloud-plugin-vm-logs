@@ -26,7 +26,6 @@ import com.cloud.exception.ConcurrentOperationException;
 import com.cloud.user.Account;
 import com.cloud.uservm.UserVm;
 import com.cloud.vm.VirtualMachine;
-import com.google.common.base.Strings;
 import org.apache.cloudstack.acl.RoleType;
 import org.apache.cloudstack.acl.SecurityChecker;
 import org.apache.cloudstack.api.ACL;
@@ -41,16 +40,13 @@ import org.apache.cloudstack.api.response.UserVmResponse;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
-@APICommand(name = ListVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = ScrollableListResponse.class, requestHasSensitiveInfo = false,
+@APICommand(name = GetVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = VmLogListResponse.class, requestHasSensitiveInfo = false,
         responseHasSensitiveInfo = true,
         responseView = ResponseObject.ResponseView.Full, authorized = {RoleType.Admin, RoleType.ResourceAdmin, RoleType.DomainAdmin, RoleType.User},
         entityType = {VirtualMachine.class})
-public class ListVmLogsCmd extends BaseCmd {
+public class GetVmLogsCmd extends BaseCmd {
 
     public static final String API_NAME = "getVmLogs";
     private static final String SEARCH_AFTER_PARAM = "searchafter";
@@ -129,29 +125,17 @@ public class ListVmLogsCmd extends BaseCmd {
     @Override
     public void execute() throws ServerApiException, ConcurrentOperationException {
         ScrollableListResponse<VmLogResponse> listResponse = _vmLogManager
-                .listVmLogs(getId(), parseDate(getStartDate(), ApiConstants.START_DATE), parseDate(getEndDate(), ApiConstants.END_DATE), getKeywords(), getLogFile(), getPage(),
-                        getPageSize(), getSearchAfterValue());
+                .listVmLogs(getId(), ParameterUtils.parseDate(getStartDate(), ApiConstants.START_DATE), ParameterUtils.parseDate(getEndDate(), ApiConstants.END_DATE),
+                        getKeywords(), getLogFile(), getPage(), getPageSize(), getSearchAfterValue());
         // recreate the response for serialization to exclude generic type lists
         VmLogListResponse response = new VmLogListResponse(listResponse.getCount(), listResponse.getItems(), listResponse.getSearchAfter());
         response.setResponseName(getCommandName());
-        response.setObjectName("vmlogs");
         setResponseObject(response);
     }
 
     @Override
     public String getCommandName() {
         return API_NAME.toLowerCase() + BaseCmd.RESPONSE_SUFFIX;
-    }
-
-    private LocalDateTime parseDate(String date, String paramName) {
-        if (Strings.isNullOrEmpty(date)) {
-            return null;
-        }
-        try {
-            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
-        }
     }
 
     private Object[] getSearchAfterValue() {

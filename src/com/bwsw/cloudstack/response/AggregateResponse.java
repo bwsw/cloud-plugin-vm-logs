@@ -15,23 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.response;
 
-import org.elasticsearch.action.search.SearchRequest;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-public interface VmLogRequestBuilder {
+public class AggregateResponse<T> {
 
-    String DATE_FIELD = "@timestamp";
-    String LOG_FILE_FIELD = "source";
-    String DATA_FIELD = "message";
-    String LOG_FILE_AGGREGATION = "logfiles";
-    String LOG_FILE_COUNT_AGGREGATION = "count_logfiles";
+    private final List<T> items;
+    private final int count;
+    private final Map<String, Object> searchAfter;
 
-    SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Object[] searchAfter, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile);
+    public AggregateResponse(List<T> items, int count, Map<String, Object> searchAfter) {
+        this.items = items;
+        this.count = count;
+        this.searchAfter = searchAfter;
+    }
 
-    SearchRequest getLogFileSearchRequest(String vmUuid, int pageSize, Map<String, Object> aggregateAfter, LocalDateTime start, LocalDateTime end);
+    public List<T> getItems() {
+        return items;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public Map<String, Object> getSearchAfter() {
+        return searchAfter;
+    }
 }

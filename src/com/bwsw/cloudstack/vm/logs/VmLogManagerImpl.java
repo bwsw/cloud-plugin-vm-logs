@@ -17,8 +17,11 @@
 
 package com.bwsw.cloudstack.vm.logs;
 
-import com.bwsw.cloudstack.api.ListVmLogsCmd;
+import com.bwsw.cloudstack.api.GetVmLogsCmd;
+import com.bwsw.cloudstack.api.ListVmLogFilesCmd;
+import com.bwsw.cloudstack.response.AggregateResponse;
 import com.bwsw.cloudstack.response.ScrollableListResponse;
+import com.bwsw.cloudstack.response.VmLogFileResponse;
 import com.bwsw.cloudstack.response.VmLogResponse;
 import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
 import com.cloud.exception.InvalidParameterValueException;
@@ -27,6 +30,7 @@ import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
 import org.apache.cloudstack.api.ApiErrorCode;
 import org.apache.cloudstack.api.ServerApiException;
+import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.Configurable;
 import org.apache.http.HttpHost;
@@ -38,6 +42,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import javax.inject.Inject;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +64,8 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     @Override
     public List<Class<?>> getCommands() {
         List<Class<?>> commands = new ArrayList<>();
-        commands.add(ListVmLogsCmd.class);
+        commands.add(GetVmLogsCmd.class);
+        commands.add(ListVmLogFilesCmd.class);
         return commands;
     }
 
@@ -95,6 +101,49 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
+    public ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize) {
+        if (pageSize == null || pageSize < 1) {
+            throw new InvalidParameterValueException("Invalid page size");
+        }
+        if (startIndex == null) {
+            startIndex = 0L;
+        } else if (startIndex < 0) {
+            throw new InvalidParameterValueException("Invalid start index");
+        }
+        if (start != null && end != null && end.isBefore(start)) {
+            throw new InvalidParameterValueException("Invalid start/end dates");
+        }
+        VMInstanceVO vmInstanceVO = _vmInstanceDao.findById(id);
+        if (vmInstanceVO == null) {
+            throw new InvalidParameterValueException("Unable to find a virtual machine with specified id");
+        }
+        SearchRequest searchRequest = _vmLogRequestBuilder.getLogFileSearchRequest(vmInstanceVO.getUuid(), pageSize.intValue(), null, start, end);
+        try {
+            AggregateResponse<VmLogFileResponse> response = _vmLogFetcher.fetchLogFiles(_restHighLevelClient, searchRequest);
+            if (startIndex < response.getCount()) {
+                long lastIndex = pageSize - 1;
+                while (startIndex > lastIndex && response.getSearchAfter() != null) {
+                    searchRequest = _vmLogRequestBuilder.getLogFileSearchRequest(vmInstanceVO.getUuid(), pageSize.intValue(), response.getSearchAfter(), start, end);
+                    response = _vmLogFetcher.fetchLogFiles(_restHighLevelClient, searchRequest);
+                    lastIndex += pageSize;
+                }
+                if (startIndex < lastIndex) {
+                    ListResponse<VmLogFileResponse> listResponse = new ListResponse<>();
+                    listResponse.setResponses(response.getItems(), response.getCount());
+                    return listResponse;
+                }
+            }
+            // more than available results are requested
+            ListResponse<VmLogFileResponse> listResponse = new ListResponse<>();
+            listResponse.setResponses(Collections.emptyList(), response.getCount());
+            return listResponse;
+        } catch (Exception e) {
+            s_logger.error("Unable to retrieve VM log files", e);
+            throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM log files");
+        }
+    }
+
+    @Override
     public void deleteVmLogs(String uuid) {
         VMInstanceVO vmInstanceVO = _vmInstanceDao.findByUuidIncludingRemoved(uuid);
         if (vmInstanceVO != null) {
@@ -125,7 +174,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     @Override
     public ConfigKey<?>[] getConfigKeys() {
-        return new ConfigKey<?>[] {VmLogElasticSearchList, VmLogDefaultPageSize, VmLogMaxPageSize};
+        return new ConfigKey<?>[] {VmLogElasticSearchList, VmLogDefaultPageSize};
     }
 
 }
