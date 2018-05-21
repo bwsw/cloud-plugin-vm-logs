@@ -64,7 +64,7 @@ public class GetVmLogsCmd extends BaseCmd {
     @Parameter(name = "keywords", type = CommandType.LIST, collectionType = CommandType.STRING, description = "keywords to search VM logs")
     private List<String> keywords;
 
-    @Parameter(name = "logFile", type = CommandType.STRING, description = "the log file to search VM logs")
+    @Parameter(name = "logfile", type = CommandType.STRING, description = "the log file to search VM logs")
     private String logFile;
 
     @Parameter(name = ApiConstants.PAGE, type = CommandType.INTEGER)
