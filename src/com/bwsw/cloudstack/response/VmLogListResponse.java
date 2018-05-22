@@ -34,6 +34,7 @@ public class VmLogListResponse extends BaseResponse {
     private List<VmLogResponse> items;
 
     public VmLogListResponse(int count, List<VmLogResponse> items, String searchAfter) {
+        super("vmlogs");
         this.count = count;
         this.items = items;
         this.searchAfter = searchAfter;
