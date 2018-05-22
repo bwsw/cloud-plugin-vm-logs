@@ -51,12 +51,13 @@ Retrieves logs for the virtual machine.
 
 | Response Name | Description |
 | -------------- | ---------- |
-| count | the total number of log entries |
-| items(*) | log entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
-| &nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
-| &nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
-| searchater | the tag to request next log page |
+| vmlogs | the log listing |
+| &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
+| &nbsp;&nbsp;&nbsp;&nbsp;searchater | the tag to request next log page |
 
 Plugin settings
 --------------------
