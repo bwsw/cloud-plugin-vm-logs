@@ -144,19 +144,6 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
-    public void deleteVmLogs(String uuid) {
-        VMInstanceVO vmInstanceVO = _vmInstanceDao.findByUuidIncludingRemoved(uuid);
-        if (vmInstanceVO != null) {
-            if (s_logger.isInfoEnabled()) {
-                s_logger.info("Deleting logs for VM " + uuid);
-                // TODO: delete logs
-            }
-        } else {
-            s_logger.error("Can not delete logs for unknown VM " + uuid);
-        }
-    }
-
-    @Override
     public boolean configure(String name, Map<String, Object> params) {
         try {
             _restHighLevelClient = new RestHighLevelClient(RestClient.builder(HttpUtils.getHttpHosts(VmLogElasticSearchList.value()).toArray(new HttpHost[] {})));

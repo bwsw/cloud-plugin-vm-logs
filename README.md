@@ -106,3 +106,17 @@ Filebeat configuration should contain a field *vm_uuid* that is the ID of the vi
 
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
+* Curator 5.5
+
+Curator is used to delete old virtual machine logs.
+
+The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/client/curator/5.5/index.html
+
+The [action file](deployment/vmlogs-curator.yml) should be used for VM log processing.
+
+In the template following placeholders should be replaced with real values:
+
+| Name | Description |
+| -------------- | ---------- |
+| %TIMEOUT% | a client timeout in seconds |
+| %DAYS% | a number of days to store VM logs |
