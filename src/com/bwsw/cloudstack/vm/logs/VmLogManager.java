@@ -38,6 +38,4 @@ public interface VmLogManager extends PluggableService {
             Object[] searchAfter);
 
     ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize);
-
-    void deleteVmLogs(String uuid);
 }

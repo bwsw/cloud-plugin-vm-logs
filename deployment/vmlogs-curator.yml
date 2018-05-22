@@ -1,0 +1,21 @@
+actions:
+  1:
+    action: delete_indices
+    description: >-
+      Delete old (based on index name) indices for vm logs by pattern vmlog-<uuid>-YYYY-MM-dd. Ignore the error if the filter does not result in an
+      actionable list of indices (ignore_empty_list) and exit cleanly.
+    options:
+      ignore_empty_list: True
+      disable_action: False
+      timeout_override: %TIMEOUT%
+    filters:
+    - filtertype: pattern
+      kind: regex
+      value: '^vmlog-[\w-]+-\d{4}\-\d{2}-\d{2}'
+    - filtertype: age
+      source: name
+      direction: older
+      timestring: '%Y-%m-%d'
+      unit: days
+      unit_count: %DAYS%
+

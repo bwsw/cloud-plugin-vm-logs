@@ -23,10 +23,6 @@
 
     <bean id="vmLogManager" class="com.bwsw.cloudstack.vm.logs.VmLogManagerImpl"/>
 
-    <bean id="eventSubscriberFactory" class="com.bwsw.cloudstack.event.EventSubscriberFactoryImpl"/>
-
-    <bean id="vmLogEventSubscriber" factory-bean="eventSubscriberFactory" factory-method="getVmLogEventSubscriber"/>
-
     <bean id="vmLogRequestBuilder" class="com.bwsw.cloudstack.vm.logs.VmLogRequestBuilderImpl"/>
 
     <bean id="vmLogFetcher" class="com.bwsw.cloudstack.vm.logs.VmLogFetcherImpl"/>
