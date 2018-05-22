@@ -127,7 +127,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
                     response = _vmLogFetcher.fetchLogFiles(_restHighLevelClient, searchRequest);
                     lastIndex += pageSize;
                 }
-                if (startIndex < lastIndex) {
+                if (startIndex <= lastIndex) {
                     ListResponse<VmLogFileResponse> listResponse = new ListResponse<>();
                     listResponse.setResponses(response.getItems(), response.getCount());
                     return listResponse;
