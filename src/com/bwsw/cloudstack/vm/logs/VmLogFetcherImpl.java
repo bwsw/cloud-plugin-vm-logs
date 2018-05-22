@@ -38,6 +38,7 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggr
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class VmLogFetcherImpl implements VmLogFetcher {
@@ -55,8 +56,11 @@ public class VmLogFetcherImpl implements VmLogFetcher {
 
     public AggregateResponse<VmLogFileResponse> fetchLogFiles(RestHighLevelClient client, SearchRequest request) throws IOException {
         SearchResponse response = client.search(request);
-        if (response.status() != RestStatus.OK || response.getAggregations() == null) {
+        if (response.status() != RestStatus.OK) {
             throw new CloudRuntimeException("Failed to retrieve VM log files");
+        }
+        if (response.getAggregations() == null) {
+            return new AggregateResponse<>(Collections.emptyList(), 0, null);
         }
         Aggregation valueAggregation = response.getAggregations().get(VmLogRequestBuilder.LOG_FILE_AGGREGATION);
         if (valueAggregation == null || !CompositeAggregationBuilder.NAME.equals(valueAggregation.getType())) {
