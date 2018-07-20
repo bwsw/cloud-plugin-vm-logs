@@ -29,8 +29,14 @@ import java.util.List;
 
 public interface VmLogManager extends PluggableService {
 
-    ConfigKey<String> VmLogElasticSearchList = new ConfigKey<>("Advanced", String.class, "vm.log.elasticsearch.list", null,
+    ConfigKey<String> VmLogElasticsearchList = new ConfigKey<>("Advanced", String.class, "vm.log.elasticsearch.list", null,
             "Comma separated list of ElasticSearch HTTP hosts; e.g. http://localhost,http://localhost:9201", false);
+
+    ConfigKey<String> VmLogElasticsearchUsername = new ConfigKey<>("Advanced", String.class, "vm.log.elasticsearch.username", null, "Elasticsearch username for authentication",
+            false);
+
+    ConfigKey<String> VmLogElasticsearchPassword = new ConfigKey<>("Advanced", String.class, "vm.log.elasticsearch.password", null, "Elasticsearch password for authentication",
+            false);
 
     ConfigKey<Integer> VmLogDefaultPageSize = new ConfigKey<>("Advanced", Integer.class, "vm.log.page.size.default", "100", "Default page size for VM log listing", true);
 

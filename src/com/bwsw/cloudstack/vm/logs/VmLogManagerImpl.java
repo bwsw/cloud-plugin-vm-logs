@@ -34,10 +34,16 @@ import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.Configurable;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.Strings;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
@@ -146,7 +152,14 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     @Override
     public boolean configure(String name, Map<String, Object> params) {
         try {
-            _restHighLevelClient = new RestHighLevelClient(RestClient.builder(HttpUtils.getHttpHosts(VmLogElasticSearchList.value()).toArray(new HttpHost[] {})));
+            RestClientBuilder restClientBuilder = RestClient.builder(HttpUtils.getHttpHosts(VmLogElasticsearchList.value()).toArray(new HttpHost[] {}));
+            String username = VmLogElasticsearchUsername.value();
+            if (!Strings.isNullOrEmpty(username)) {
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, VmLogElasticsearchPassword.value()));
+                restClientBuilder = restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+            }
+            _restHighLevelClient = new RestHighLevelClient(restClientBuilder);
         } catch (IllegalArgumentException e) {
             s_logger.error("Failed to create ElasticSearch client", e);
             return false;
@@ -161,7 +174,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     @Override
     public ConfigKey<?>[] getConfigKeys() {
-        return new ConfigKey<?>[] {VmLogElasticSearchList, VmLogDefaultPageSize};
+        return new ConfigKey<?>[] {VmLogElasticsearchList, VmLogElasticsearchUsername, VmLogElasticsearchPassword, VmLogDefaultPageSize};
     }
 
 }
