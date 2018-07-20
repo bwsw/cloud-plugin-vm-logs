@@ -64,7 +64,9 @@ Plugin settings
 
 | Name | Description | Default value |
 | -------------- | ----------- | -------- |
-| vm.log.elasticsearch.list | comma separated list of ElasticSearch HTTP hosts; e.g. http://localhost,http://localhost:9201| |
+| vm.log.elasticsearch.list | comma separated list of ElasticSearch HTTP hosts; e.g. http://localhost,http://localhost:9201 | |
+| vm.log.elasticsearch.username | Elasticsearch username for authentication; should be empty if authentication is disabled | |
+| vm.log.elasticsearch.password | Elasticsearch password for authentication; should be empty if authentication is disabled | |
 | vm.log.page.size.default | the default page size for VM log listing | 100 |
   
 Deployment
