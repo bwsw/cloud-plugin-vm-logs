@@ -22,21 +22,21 @@ import java.util.List;
 public class ScrollableListResponse<T> {
 
     private final int count;
-    private final String searchAfter;
+    private final String scrollId;
     private List<T> items;
 
-    public ScrollableListResponse(int count, List<T> items, String searchAfter) {
+    public ScrollableListResponse(int count, List<T> items, String scrollId) {
         this.count = count;
         this.items = items;
-        this.searchAfter = searchAfter;
+        this.scrollId = scrollId;
     }
 
     public int getCount() {
         return count;
     }
 
-    public String getSearchAfter() {
-        return searchAfter;
+    public String getScrollId() {
+        return scrollId;
     }
 
     public List<T> getItems() {

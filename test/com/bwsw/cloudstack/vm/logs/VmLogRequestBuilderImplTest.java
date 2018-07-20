@@ -17,6 +17,7 @@
 
 package com.bwsw.cloudstack.vm.logs;
 
+import com.bwsw.cloustrack.vm.logs.entity.SortField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -25,6 +26,8 @@ import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -34,13 +37,13 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -74,42 +77,80 @@ public class VmLogRequestBuilderImplTest {
     private static final String UUID = "uuid";
     private static final int PAGE_SIZE = 15;
     private static final int PAGE = 1;
+    private static final int TIMEOUT = 60000;
     private static final String[] FIELDS = {VmLogRequestBuilder.LOG_FILE_FIELD, VmLogRequestBuilder.DATA_FIELD, VmLogRequestBuilder.DATE_FIELD};
     private static final String[] EXCLUDED_FIELDS = {};
-    private static final Object[] SEARCH_AFTER = {12345, "text"};
-    private static final String[] SORT_FIELDS = {VmLogRequestBuilder.DATE_FIELD, "_id"};
     private static final Map<String, Object> AGGREGATE_AFTER = ImmutableMap.of("source", "file.log");
     private static final ObjectMapper s_objectMapper = new ObjectMapper();
 
     private VmLogRequestBuilderImpl _vmLogQueryBuilder = new VmLogRequestBuilderImpl();
 
     @Test
-    public void testGetSearchQueryBasicRequest() {
-        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, null, null, null, null);
+    public void testGetLogSearchRequestBasicRequest() {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, null, null, null, null, null);
 
         checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
-        assertEquals(PAGE, searchRequest.source().from());
+        assertEquals((PAGE - 1) * PAGE_SIZE, searchRequest.source().from());
         assertNull(searchRequest.source().query());
     }
 
     @Test
-    public void testGetSearchQuerySearchAfter() {
-        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, SEARCH_AFTER, null, null, null, null);
+    public void testGetLogSearchRequestScroll() {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, TIMEOUT, null, null, null, null, null);
 
         checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
         assertEquals(-1, searchRequest.source().from());
-        assertArrayEquals(SEARCH_AFTER, searchRequest.source().searchAfter());
+        assertNotNull(searchRequest.scroll());
+        assertEquals(TimeValue.timeValueMillis(TIMEOUT), searchRequest.scroll().keepAlive());
         assertNull(searchRequest.source().query());
     }
 
     @Test
     @UseDataProvider("filters")
-    public void testGetSearchQueryFilters(LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, String resultFile) throws IOException {
-        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, start, end, keywords, logFile);
+    public void testGetLogSearchRequestFilters(LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, String resultFile) throws IOException {
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, null, start, end, keywords, logFile, null);
 
         checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
 
         checkQuery(searchRequest, IOUtils.resourceToString(resultFile, Charset.defaultCharset(), this.getClass().getClassLoader()));
+    }
+
+    @Test
+    public void testGetLogSearchRequestSorting() {
+        List<SortField> sortFields = new ArrayList<>();
+        sortFields.add(new SortField(VmLogRequestBuilder.LOG_FILE_FIELD, SortField.SortOrder.ASC));
+        sortFields.add(new SortField(VmLogRequestBuilder.DATE_FIELD, SortField.SortOrder.DESC));
+
+        SearchRequest searchRequest = _vmLogQueryBuilder.getLogSearchRequest(UUID, PAGE, PAGE_SIZE, TIMEOUT, null, null, null, null, sortFields);
+
+        checkCommonSearchQuerySettings(searchRequest, PAGE_SIZE);
+        List<SortBuilder<?>> sortBuilders = searchRequest.source().sorts();
+        assertNotNull(sortBuilders);
+        assertEquals(sortFields.size(), sortBuilders.size());
+        for (int i = 0; i < sortBuilders.size(); i++) {
+            SortBuilder<?> sortBuilder = sortBuilders.get(i);
+            assertTrue(sortBuilder instanceof FieldSortBuilder);
+            SortField sortField = sortFields.get(i);
+            assertEquals(sortField.getField(), ((FieldSortBuilder)sortBuilder).getFieldName());
+            switch (sortBuilder.order()) {
+            case DESC:
+                assertEquals(SortField.SortOrder.DESC, sortField.getOrder());
+                break;
+            case ASC:
+                assertEquals(SortField.SortOrder.ASC, sortField.getOrder());
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void testGetScrollRequest() {
+        SearchScrollRequest request = _vmLogQueryBuilder.getScrollRequest(UUID, TIMEOUT);
+
+        assertNotNull(request);
+        assertEquals(UUID, request.scrollId());
+        assertNotNull(request.scroll());
+        assertEquals(TimeValue.timeValueMillis(TIMEOUT), request.scroll().keepAlive());
     }
 
     @Test
@@ -148,18 +189,6 @@ public class VmLogRequestBuilderImplTest {
         assertNotNull(fetchSourceContext);
         assertArrayEquals(FIELDS, fetchSourceContext.includes());
         assertArrayEquals(EXCLUDED_FIELDS, fetchSourceContext.excludes());
-
-        List<? extends SortBuilder> sorts = searchSourceBuilder.sorts();
-        assertNotNull(sorts);
-        assertEquals(SORT_FIELDS.length, sorts.size());
-        for (int i = 0; i < sorts.size(); i++) {
-            SortBuilder sortBuilder = sorts.get(i);
-            assertNotNull(sortBuilder);
-            assertTrue(sortBuilder instanceof FieldSortBuilder);
-            FieldSortBuilder fieldSortBuilder = (FieldSortBuilder)sortBuilder;
-            assertEquals(SortOrder.ASC, fieldSortBuilder.order());
-            assertEquals(SORT_FIELDS[i], fieldSortBuilder.getFieldName());
-        }
     }
 
     private void checkCommonLogFileQuerySettings(SearchRequest searchRequest, int pageSize, Map<String, Object> after) throws IOException {

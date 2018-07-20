@@ -40,8 +40,10 @@ public interface VmLogManager extends PluggableService {
 
     ConfigKey<Integer> VmLogDefaultPageSize = new ConfigKey<>("Advanced", Integer.class, "vm.log.page.size.default", "100", "Default page size for VM log listing", true);
 
-    ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, Integer page, Integer pageSize,
-            Object[] searchAfter);
+    ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, List<String> sortFields, Integer page,
+            Integer pageSize, Integer scroll);
+
+    ScrollableListResponse<VmLogResponse> scrollVmLogs(String scrollId, Integer timeout);
 
     ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize);
 }
