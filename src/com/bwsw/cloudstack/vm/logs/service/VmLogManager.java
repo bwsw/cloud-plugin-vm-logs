@@ -15,11 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.vm.logs.service;
 
-import com.bwsw.cloudstack.response.ScrollableListResponse;
-import com.bwsw.cloudstack.response.VmLogFileResponse;
-import com.bwsw.cloudstack.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogResponse;
 import com.cloud.utils.component.PluggableService;
 import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.framework.config.ConfigKey;

@@ -21,9 +21,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="vmLogManager" class="com.bwsw.cloudstack.vm.logs.VmLogManagerImpl"/>
+    <bean id="vmLogManager" class="com.bwsw.cloudstack.vm.logs.service.VmLogManagerImpl"/>
 
-    <bean id="vmLogRequestBuilder" class="com.bwsw.cloudstack.vm.logs.VmLogRequestBuilderImpl"/>
+    <bean id="vmLogRequestBuilder" class="com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilderImpl"/>
 
-    <bean id="vmLogFetcher" class="com.bwsw.cloudstack.vm.logs.VmLogFetcherImpl"/>
+    <bean id="vmLogFetcher" class="com.bwsw.cloudstack.vm.logs.service.VmLogFetcherImpl"/>
 </beans>

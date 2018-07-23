@@ -15,12 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.api;
+package com.bwsw.cloudstack.vm.logs.api;
 
-import com.bwsw.cloudstack.response.ScrollableListResponse;
-import com.bwsw.cloudstack.response.VmLogListResponse;
-import com.bwsw.cloudstack.response.VmLogResponse;
-import com.bwsw.cloudstack.vm.logs.VmLogManager;
+import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.service.VmLogManager;
 import com.cloud.exception.ConcurrentOperationException;
 import org.apache.cloudstack.acl.RoleType;
 import org.apache.cloudstack.api.APICommand;

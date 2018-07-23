@@ -15,11 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.vm.logs.service;
 
-import com.bwsw.cloudstack.response.AggregateResponse;
-import com.bwsw.cloudstack.response.ScrollableListResponse;
-import com.bwsw.cloudstack.response.VmLogFileResponse;
+import com.bwsw.cloudstack.vm.logs.response.AggregateResponse;
+import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
 import com.cloud.utils.exception.CloudRuntimeException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cloudstack.api.ResponseObject;

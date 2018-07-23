@@ -15,32 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.response;
+package com.bwsw.cloudstack.vm.logs.response;
 
 import java.util.List;
-import java.util.Map;
 
-public class AggregateResponse<T> {
+public class ScrollableListResponse<T> {
 
-    private final List<T> items;
     private final int count;
-    private final Map<String, Object> searchAfter;
+    private final String scrollId;
+    private List<T> items;
 
-    public AggregateResponse(List<T> items, int count, Map<String, Object> searchAfter) {
-        this.items = items;
+    public ScrollableListResponse(int count, List<T> items, String scrollId) {
         this.count = count;
-        this.searchAfter = searchAfter;
-    }
-
-    public List<T> getItems() {
-        return items;
+        this.items = items;
+        this.scrollId = scrollId;
     }
 
     public int getCount() {
         return count;
     }
 
-    public Map<String, Object> getSearchAfter() {
-        return searchAfter;
+    public String getScrollId() {
+        return scrollId;
+    }
+
+    public List<T> getItems() {
+        return items;
     }
 }

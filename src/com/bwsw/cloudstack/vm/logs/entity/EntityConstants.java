@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloustrack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.entity;
 
 public class EntityConstants {
 

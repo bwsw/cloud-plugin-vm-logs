@@ -15,40 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.response;
+package com.bwsw.cloudstack.vm.logs.response;
 
+import com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilder;
+import com.cloud.serializer.Param;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import org.apache.cloudstack.api.BaseResponse;
 
-import java.util.List;
+public class VmLogFileResponse extends BaseResponse {
 
-public class VmLogListResponse extends BaseResponse {
+    @Param(description = "the log file")
+    @JsonAlias(VmLogRequestBuilder.LOG_FILE_FIELD)
+    @JsonProperty("file")
+    @SerializedName("file")
+    private final String file;
 
-    @SerializedName("count")
-    private final int count;
-
-    @SerializedName("scrollid")
-    private final String scrollId;
-
-    @SerializedName("items")
-    private List<VmLogResponse> items;
-
-    public VmLogListResponse(int count, List<VmLogResponse> items, String scrollId) {
-        super("vmlogs");
-        this.count = count;
-        this.items = items;
-        this.scrollId = scrollId;
+    public VmLogFileResponse(String file) {
+        super("vmlogfiles");
+        this.file = file;
     }
 
-    public int getCount() {
-        return count;
-    }
-
-    public String getScrollId() {
-        return scrollId;
-    }
-
-    public List<VmLogResponse> getItems() {
-        return items;
+    public String getFile() {
+        return file;
     }
 }
