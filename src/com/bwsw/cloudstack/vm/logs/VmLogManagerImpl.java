@@ -62,8 +62,8 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     private static final Logger s_logger = Logger.getLogger(VmLogManagerImpl.class);
     private static final Map<String, String> s_logFields = ImmutableMap
-            .of(EntityConstants.TIMESTAMP, VmLogRequestBuilder.DATE_FIELD, EntityConstants.FILE, VmLogRequestBuilder.LOG_FILE_FIELD, EntityConstants.LOG,
-                    VmLogRequestBuilder.DATA_FIELD);
+            .of(EntityConstants.TIMESTAMP, VmLogRequestBuilder.DATE_FIELD, EntityConstants.FILE, VmLogRequestBuilder.LOG_FILE_SORT_FIELD, EntityConstants.LOG,
+                    VmLogRequestBuilder.DATA_SORT_FIELD);
 
     @Inject
     private VMInstanceDao _vmInstanceDao;

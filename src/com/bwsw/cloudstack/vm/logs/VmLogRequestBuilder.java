@@ -29,7 +29,9 @@ public interface VmLogRequestBuilder {
 
     String DATE_FIELD = "@timestamp";
     String LOG_FILE_FIELD = "source";
+    String LOG_FILE_SORT_FIELD = "source.keyword";
     String DATA_FIELD = "message";
+    String DATA_SORT_FIELD = "message.keyword";
     String LOG_FILE_AGGREGATION = "logfiles";
     String LOG_FILE_COUNT_AGGREGATION = "count_logfiles";
 
