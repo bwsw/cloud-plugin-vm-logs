@@ -22,13 +22,16 @@ import com.bwsw.cloudstack.response.ScrollableListResponse;
 import com.bwsw.cloudstack.response.VmLogFileResponse;
 import org.apache.cloudstack.api.ResponseObject;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.IOException;
 
 public interface VmLogFetcher {
 
-    <T extends ResponseObject> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass, boolean scroll) throws IOException;
+    <T extends ResponseObject> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass) throws IOException;
+
+    <T extends ResponseObject> ScrollableListResponse<T> scroll(RestHighLevelClient client, SearchScrollRequest request, Class<T> elementClass) throws IOException;
 
     AggregateResponse<VmLogFileResponse> fetchLogFiles(RestHighLevelClient client, SearchRequest request) throws IOException;
 }

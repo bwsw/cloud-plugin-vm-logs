@@ -15,25 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.util;
+package com.bwsw.cloustrack.vm.logs.entity;
 
-import org.apache.cloudstack.api.ApiErrorCode;
-import org.apache.cloudstack.api.ServerApiException;
+public class EntityConstants {
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-
-public class ParameterUtils {
-
-    public static LocalDateTime parseDate(String date, String paramName) throws DateTimeParseException {
-        if (date == null) {
-            return null;
-        }
-        try {
-            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
-        }
-    }
+    public static final String TIMESTAMP = "timestamp";
+    public static final String FILE = "file";
+    public static final String LOG = "log";
 }

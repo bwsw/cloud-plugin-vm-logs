@@ -17,7 +17,9 @@
 
 package com.bwsw.cloudstack.vm.logs;
 
+import com.bwsw.cloustrack.vm.logs.entity.SortField;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchScrollRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +33,10 @@ public interface VmLogRequestBuilder {
     String LOG_FILE_AGGREGATION = "logfiles";
     String LOG_FILE_COUNT_AGGREGATION = "count_logfiles";
 
-    SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Object[] searchAfter, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile);
+    SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Integer timeout, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile,
+            List<SortField> sortFields);
+
+    SearchScrollRequest getScrollRequest(String scrollId, int scrollTimeout);
 
     SearchRequest getLogFileSearchRequest(String vmUuid, int pageSize, Map<String, Object> aggregateAfter, LocalDateTime start, LocalDateTime end);
 }

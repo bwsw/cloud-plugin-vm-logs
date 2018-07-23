@@ -17,8 +17,11 @@
 
 package com.bwsw.cloudstack.vm.logs;
 
+import com.bwsw.cloustrack.vm.logs.entity.SortField;
 import com.google.common.base.Strings;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -27,7 +30,6 @@ import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregati
 import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 import java.time.LocalDateTime;
@@ -40,24 +42,23 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
 
     private static final String INDEX_PREFIX = "vmlog-";
     private static final String INDEX_SUFFIX = "-*";
-    private static final String ID_FIELD = "_id";
     private static final String[] FIELDS = new String[] {LOG_FILE_FIELD, DATA_FIELD, DATE_FIELD};
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String LOG_FILE_KEYWORD_FIELD = LOG_FILE_FIELD + ".keyword";
 
     @Override
-    public SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Object[] searchAfter, LocalDateTime start, LocalDateTime end, List<String> keywords,
-            String logFile) {
+    public SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Integer timeout, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile,
+            List<SortField> sortFields) {
         SearchRequest request = new SearchRequest(getIndex(vmUuid));
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.fetchSource(FIELDS, null);
         sourceBuilder.size(pageSize);
 
-        if (searchAfter != null) {
-            sourceBuilder.searchAfter(searchAfter);
+        if (timeout != null) {
+            request.scroll(TimeValue.timeValueMillis(timeout));
         } else {
-            sourceBuilder.from((page - 1) * pageSize + 1);
+            sourceBuilder.from((page - 1) * pageSize);
         }
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
@@ -81,10 +82,19 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
         if (queryBuilder.hasClauses()) {
             sourceBuilder.query(queryBuilder);
         }
-        sourceBuilder.sort(new FieldSortBuilder(DATE_FIELD).order(SortOrder.ASC));
-        sourceBuilder.sort(new FieldSortBuilder(ID_FIELD).order(SortOrder.ASC));
-
+        if (sortFields != null && !sortFields.isEmpty()) {
+            for (SortField sortField : sortFields) {
+                sourceBuilder.sort(sortField.getField(), convert(sortField.getOrder()));
+            }
+        }
         request.source(sourceBuilder);
+        return request;
+    }
+
+    @Override
+    public SearchScrollRequest getScrollRequest(String scrollId, int scrollTimeout) {
+        SearchScrollRequest request = new SearchScrollRequest(scrollId);
+        request.scroll(TimeValue.timeValueMillis(scrollTimeout));
         return request;
     }
 
@@ -126,5 +136,16 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
 
     private String format(LocalDateTime dateTime) {
         return DATE_TIME_FORMATTER.format(dateTime);
+    }
+
+    private SortOrder convert(SortField.SortOrder sortOrder) {
+        switch (sortOrder) {
+        case ASC:
+            return SortOrder.ASC;
+        case DESC:
+            return SortOrder.DESC;
+        default:
+            throw new IllegalArgumentException("Unknown sort order " + sortOrder);
+        }
     }
 }

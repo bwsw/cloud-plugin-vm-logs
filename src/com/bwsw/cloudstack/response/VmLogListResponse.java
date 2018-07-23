@@ -27,25 +27,25 @@ public class VmLogListResponse extends BaseResponse {
     @SerializedName("count")
     private final int count;
 
-    @SerializedName("searchafter")
-    private final String searchAfter;
+    @SerializedName("scrollid")
+    private final String scrollId;
 
     @SerializedName("items")
     private List<VmLogResponse> items;
 
-    public VmLogListResponse(int count, List<VmLogResponse> items, String searchAfter) {
+    public VmLogListResponse(int count, List<VmLogResponse> items, String scrollId) {
         super("vmlogs");
         this.count = count;
         this.items = items;
-        this.searchAfter = searchAfter;
+        this.scrollId = scrollId;
     }
 
     public int getCount() {
         return count;
     }
 
-    public String getSearchAfter() {
-        return searchAfter;
+    public String getScrollId() {
+        return scrollId;
     }
 
     public List<VmLogResponse> getItems() {

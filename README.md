@@ -36,6 +36,8 @@ Lists available log files for the virtual machine.
 
 Retrieves logs for the virtual machine.
 
+If both page/pagesize and scroll parameters are specified scroll is used.
+
 | Parameter Name | Description | Required |
 | -------------- | ----------- | -------- |
 | id | the ID of the virtual machine | true |
@@ -43,9 +45,10 @@ Retrieves logs for the virtual machine.
 | enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
 | keywords | keywords (AND operator if multiple keywords are specified) | false |
 | logfile | the log file | false |
+| sort | comma separated list of response tags optionally prefixed with - for descending order | false |
 | page | the requested page of the result listing | false |
 | pagesize | the size for result listing | false |
-| searchafter | the tag to retrieve next log page if page*pagesize is too big (by default 10000) | false | 
+| scroll | timeout in ms for subsequent scroll requests | false | 
 
 **Response tags**
 
@@ -57,7 +60,28 @@ Retrieves logs for the virtual machine.
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
-| &nbsp;&nbsp;&nbsp;&nbsp;searchater | the tag to request next log page |
+| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next log batch |
+
+# scrollVmLogs
+
+Retrieves next batch of logs for the virtual machine.
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| scrollid | the tag to request log batch | true |
+| true | timeout in ms for subsequent scroll requests | true | 
+
+**Response tags**
+
+| Response Name | Description |
+| -------------- | ---------- |
+| vmlogs | the log listing |
+| &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
+| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next log batch |
 
 Plugin settings
 --------------------
