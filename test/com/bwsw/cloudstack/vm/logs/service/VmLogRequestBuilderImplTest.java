@@ -15,9 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.vm.logs.service;
 
-import com.bwsw.cloustrack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.entity.SortField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

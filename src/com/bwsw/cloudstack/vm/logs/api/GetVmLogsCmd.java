@@ -15,10 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.api;
+package com.bwsw.cloudstack.vm.logs.api;
 
-import com.bwsw.cloudstack.response.VmLogFileResponse;
-import com.bwsw.cloudstack.vm.logs.VmLogManager;
+import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.service.VmLogManager;
 import com.bwsw.cloudstack.vm.logs.util.ParameterUtils;
 import com.cloud.exception.ConcurrentOperationException;
 import com.cloud.user.Account;
@@ -30,21 +32,20 @@ import org.apache.cloudstack.api.ACL;
 import org.apache.cloudstack.api.APICommand;
 import org.apache.cloudstack.api.ApiConstants;
 import org.apache.cloudstack.api.BaseCmd;
-import org.apache.cloudstack.api.BaseListCmd;
 import org.apache.cloudstack.api.Parameter;
 import org.apache.cloudstack.api.ResponseObject;
 import org.apache.cloudstack.api.ServerApiException;
-import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.api.response.UserVmResponse;
 
 import javax.inject.Inject;
+import java.util.List;
 
-@APICommand(name = ListVmLogFilesCmd.API_NAME, description = "Lists VM log files", responseObject = VmLogFileResponse.class, requestHasSensitiveInfo = false,
-        responseHasSensitiveInfo = true, responseView = ResponseObject.ResponseView.Full,
-        authorized = {RoleType.Admin, RoleType.ResourceAdmin, RoleType.DomainAdmin, RoleType.User}, entityType = {VirtualMachine.class})
-public class ListVmLogFilesCmd extends BaseListCmd {
+@APICommand(name = GetVmLogsCmd.API_NAME, description = "Gets VM logs", responseObject = VmLogListResponse.class, requestHasSensitiveInfo = false, responseHasSensitiveInfo = true,
+        responseView = ResponseObject.ResponseView.Full, authorized = {RoleType.Admin, RoleType.ResourceAdmin, RoleType.DomainAdmin, RoleType.User},
+        entityType = {VirtualMachine.class})
+public class GetVmLogsCmd extends BaseCmd {
 
-    public static final String API_NAME = "listVmLogFiles";
+    public static final String API_NAME = "getVmLogs";
 
     @ACL(accessType = SecurityChecker.AccessType.OperateEntry)
     @Parameter(name = ApiConstants.ID, type = CommandType.UUID, entityType = UserVmResponse.class, required = true, description = "the ID of the virtual machine")
@@ -56,6 +57,24 @@ public class ListVmLogFilesCmd extends BaseListCmd {
     @Parameter(name = ApiConstants.END_DATE, type = CommandType.STRING, description = "the end date/time to search VM logs in UTC, yyyy-MM-dd'T'HH:mm:ss")
     private String endDate;
 
+    @Parameter(name = "keywords", type = CommandType.LIST, collectionType = CommandType.STRING, description = "keywords to search VM logs")
+    private List<String> keywords;
+
+    @Parameter(name = "logfile", type = CommandType.STRING, description = "the log file to search VM logs")
+    private String logFile;
+
+    @Parameter(name = "sort", type = CommandType.LIST, collectionType = CommandType.STRING, description = "response fields to sort VM logs (the prefix - for descending order)")
+    private List<String> sortFields;
+
+    @Parameter(name = ApiConstants.PAGE, type = CommandType.INTEGER)
+    private Integer page;
+
+    @Parameter(name = ApiConstants.PAGE_SIZE, type = CommandType.INTEGER)
+    private Integer pageSize;
+
+    @Parameter(name = "scroll", type = CommandType.INTEGER, description = "timeout in ms for subsequent scroll requests")
+    private Integer scroll;
+
     @Inject
     private VmLogManager _vmLogManager;
 
@@ -63,24 +82,36 @@ public class ListVmLogFilesCmd extends BaseListCmd {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getStartDate() {
         return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
     }
 
     public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public String getLogFile() {
+        return logFile;
+    }
+
+    public List<String> getSortFields() {
+        return sortFields;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public Integer getScroll() {
+        return scroll;
     }
 
     @Override
@@ -96,11 +127,12 @@ public class ListVmLogFilesCmd extends BaseListCmd {
 
     @Override
     public void execute() throws ServerApiException, ConcurrentOperationException {
-        ListResponse<VmLogFileResponse> response = _vmLogManager
-                .listVmLogFiles(getId(), ParameterUtils.parseDate(getStartDate(), ApiConstants.START_DATE), ParameterUtils.parseDate(getEndDate(), ApiConstants.END_DATE),
-                        getStartIndex(), getPageSizeVal());
+        ScrollableListResponse<VmLogResponse> listResponse = _vmLogManager
+                .listVmLogs(getId(), ParameterUtils.parseDate(getStartDate(), ApiConstants.START_DATE), ParameterUtils.parseDate(getEndDate(), ApiConstants.END_DATE),
+                        getKeywords(), getLogFile(), getSortFields(), getPage(), getPageSize(), getScroll());
+        // recreate the response for serialization to exclude generic type lists
+        VmLogListResponse response = new VmLogListResponse(listResponse.getCount(), listResponse.getItems(), listResponse.getScrollId());
         response.setResponseName(getCommandName());
-        response.setObjectName("vmlogfiles");
         setResponseObject(response);
     }
 

@@ -15,9 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.vm.logs.service;
 
-import com.bwsw.cloustrack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.entity.SortField;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 

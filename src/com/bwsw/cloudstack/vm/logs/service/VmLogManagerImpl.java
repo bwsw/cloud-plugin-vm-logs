@@ -15,18 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs;
+package com.bwsw.cloudstack.vm.logs.service;
 
-import com.bwsw.cloudstack.api.GetVmLogsCmd;
-import com.bwsw.cloudstack.api.ListVmLogFilesCmd;
-import com.bwsw.cloudstack.api.ScrollVmLogsCmd;
-import com.bwsw.cloudstack.response.AggregateResponse;
-import com.bwsw.cloudstack.response.ScrollableListResponse;
-import com.bwsw.cloudstack.response.VmLogFileResponse;
-import com.bwsw.cloudstack.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.api.GetVmLogsCmd;
+import com.bwsw.cloudstack.vm.logs.api.ListVmLogFilesCmd;
+import com.bwsw.cloudstack.vm.logs.api.ScrollVmLogsCmd;
+import com.bwsw.cloudstack.vm.logs.entity.EntityConstants;
+import com.bwsw.cloudstack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.response.AggregateResponse;
+import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
+import com.bwsw.cloudstack.vm.logs.response.VmLogResponse;
 import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
-import com.bwsw.cloustrack.vm.logs.entity.EntityConstants;
-import com.bwsw.cloustrack.vm.logs.entity.SortField;
 import com.cloud.exception.InvalidParameterValueException;
 import com.cloud.utils.component.ComponentLifecycleBase;
 import com.cloud.vm.VMInstanceVO;
