@@ -81,8 +81,6 @@ See [VM log response tags](#vm-log-response-tags).
 
 ### VM log response tags
 
-**Response tags**
-
 | Response Name | Description |
 | -------------- | ---------- |
 | vmlogs | the log listing |
