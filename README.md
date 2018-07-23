@@ -4,15 +4,21 @@ Apache CloudStack Plugin for virtual machine logs
 This project provides API plugin for Apache CloudStack to process and view virtual machine logs.
 The version of the plugin matches Apache CloudStack version that it is build for.
 
-API
----
+* [API](#api)
+* [Plugin settings](#plugin-settings)
+* [Deployment](#deployment)
+
+# API
 
 The plugin provides following API commands to view virtual machine logs:
 
-* listVmLogFiles
-* getVmLogs
+* [listVmLogFiles](#listvmlogfiles)
+* [getVmLogs](#getvmlogs)
+* [scrollVmLogs](#scrollvmlogs)
 
-# listVmLogFiles
+## Commands
+
+### listVmLogFiles
 
 Lists available log files for the virtual machine.
 
@@ -32,11 +38,11 @@ Lists available log files for the virtual machine.
 | -------------- | ---------- |
 | file | the log file name |
 
-# getVmLogs
+### getVmLogs
 
 Retrieves logs for the virtual machine.
 
-If both page/pagesize and scroll parameters are specified scroll is used.
+**Request parameters**
 
 | Parameter Name | Description | Required |
 | -------------- | ----------- | -------- |
@@ -50,26 +56,30 @@ If both page/pagesize and scroll parameters are specified scroll is used.
 | pagesize | the size for result listing | false |
 | scroll | timeout in ms for subsequent scroll requests | false | 
 
+If both page/pagesize and scroll parameters are specified scroll is used.
+
 **Response tags**
 
-| Response Name | Description |
-| -------------- | ---------- |
-| vmlogs | the log listing |
-| &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
-| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next log batch |
+See [VM log response tags](#vm-log-response-tags).
 
-# scrollVmLogs
+### scrollVmLogs
 
 Retrieves next batch of logs for the virtual machine.
 
+**Request parameters**
+
 | Parameter Name | Description | Required |
 | -------------- | ----------- | -------- |
-| scrollid | the tag to request log batch | true |
-| true | timeout in ms for subsequent scroll requests | true | 
+| scrollid | the tag to request next batch of logs | true |
+| timeout | timeout in ms for subsequent scroll requests | true | 
+
+**Response tags**
+
+See [VM log response tags](#vm-log-response-tags).
+
+## Response tags
+
+### VM log response tags
 
 **Response tags**
 
@@ -81,10 +91,9 @@ Retrieves next batch of logs for the virtual machine.
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
-| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next log batch |
+| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next batch of logs |
 
-Plugin settings
---------------------
+# Plugin settings
 
 | Name | Description | Default value |
 | -------------- | ----------- | -------- |
@@ -93,8 +102,7 @@ Plugin settings
 | vm.log.elasticsearch.password | Elasticsearch password for authentication; should be empty if authentication is disabled | |
 | vm.log.page.size.default | the default page size for VM log listing | 100 |
   
-Deployment
-----------
+# Deployment
 
 Following components should be deployed:
 
