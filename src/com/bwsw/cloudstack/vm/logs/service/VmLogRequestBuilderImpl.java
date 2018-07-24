@@ -73,7 +73,7 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
             queryBuilder.filter(dateFilter);
         }
         if (!Strings.isNullOrEmpty(logFile)) {
-            queryBuilder.filter(QueryBuilders.termQuery(LOG_FILE_FIELD, logFile));
+            queryBuilder.filter(QueryBuilders.termQuery(LOG_FILE_KEYWORD_FIELD, logFile));
         }
         if (keywords != null && !keywords.isEmpty()) {
             keywords.forEach(e -> queryBuilder.must(QueryBuilders.matchQuery(DATA_FIELD, e)));
