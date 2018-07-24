@@ -63,7 +63,7 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (start != null || end != null) {
-            RangeQueryBuilder dateFilter = QueryBuilders.rangeQuery(DATA_FIELD);
+            RangeQueryBuilder dateFilter = QueryBuilders.rangeQuery(DATE_FIELD);
             if (start != null) {
                 dateFilter.gte(format(start));
             }
@@ -107,7 +107,7 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
         sourceBuilder.trackTotalHits(false);
 
         if (start != null || end != null) {
-            RangeQueryBuilder dateFilter = QueryBuilders.rangeQuery(DATA_FIELD);
+            RangeQueryBuilder dateFilter = QueryBuilders.rangeQuery(DATE_FIELD);
             if (start != null) {
                 dateFilter.gte(format(start));
             }

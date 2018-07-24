@@ -1,1 +1,1 @@
-{"range":{"message":{"from":"2018-05-01T10:00:00.000Z","to":null,"include_lower":true,"include_upper":true,"boost":1.0}}}
+{"range":{"@timestamp":{"from":"2018-05-01T10:00:00.000Z","to":null,"include_lower":true,"include_upper":true,"boost":1.0}}}
