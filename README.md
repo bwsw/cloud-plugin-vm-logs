@@ -99,6 +99,9 @@ See [VM log response tags](#vm-log-response-tags).
 | vm.log.elasticsearch.username | Elasticsearch username for authentication; should be empty if authentication is disabled | |
 | vm.log.elasticsearch.password | Elasticsearch password for authentication; should be empty if authentication is disabled | |
 | vm.log.page.size.default | the default page size for VM log listing | 100 |
+
+*default.page.size* is used as a default value for pagesize parameter in [listVmLogFiles](#listvmlogfiles) command. Its value should be less or equal to Elasticsearch 
+*index.max_result_window* otherwise listVmLogFiles requests without pagesize parameter will fail.
   
 # Deployment
 
