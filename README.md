@@ -115,7 +115,7 @@ Following components should be deployed:
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
-*vmlog-** with an adjusted mapping for _message_ and _source_ properties should be created.
+*vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
 * Logstash 6.2
 
