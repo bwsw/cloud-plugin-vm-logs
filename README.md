@@ -58,6 +58,9 @@ Retrieves logs for the virtual machine.
 
 If both page/pagesize and scroll parameters are specified scroll is used.
 
+Sorting and filtering for _file_ and _log_ tags in responses is applied to 256 first characters. 
+The information how to change the limit can be found at [deployment section](#deployment).  
+
 **Response tags**
 
 See [VM log response tags](#vm-log-response-tags).
@@ -110,6 +113,9 @@ Following components should be deployed:
 * ElasticSearch 6.2
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
+
+If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
+*vmlog-** with an adjusted mapping for _message_ and _source_ properties should be created.
 
 * Logstash 6.2
 
