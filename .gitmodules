@@ -1,0 +1,3 @@
+[submodule "cloudstack"]
+	path = cloudstack
+	url = https://github.com/apache/cloudstack.git
