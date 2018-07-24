@@ -15,25 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.util;
+package com.bwsw.cloudstack.vm.logs.response;
 
-import org.apache.cloudstack.api.ApiErrorCode;
-import org.apache.cloudstack.api.ServerApiException;
+import com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilder;
+import com.cloud.serializer.Param;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
+import org.apache.cloudstack.api.BaseResponse;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+public class VmLogFileResponse extends BaseResponse {
 
-public class ParameterUtils {
+    @Param(description = "the log file")
+    @JsonAlias(VmLogRequestBuilder.LOG_FILE_FIELD)
+    @JsonProperty("file")
+    @SerializedName("file")
+    private final String file;
 
-    public static LocalDateTime parseDate(String date, String paramName) throws DateTimeParseException {
-        if (date == null) {
-            return null;
-        }
-        try {
-            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
-        }
+    public VmLogFileResponse(String file) {
+        super("vmlogfiles");
+        this.file = file;
+    }
+
+    public String getFile() {
+        return file;
     }
 }

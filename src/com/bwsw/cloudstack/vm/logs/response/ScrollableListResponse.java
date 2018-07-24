@@ -15,25 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.util;
+package com.bwsw.cloudstack.vm.logs.response;
 
-import org.apache.cloudstack.api.ApiErrorCode;
-import org.apache.cloudstack.api.ServerApiException;
+import java.util.List;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+public class ScrollableListResponse<T> {
 
-public class ParameterUtils {
+    private final int count;
+    private final String scrollId;
+    private List<T> items;
 
-    public static LocalDateTime parseDate(String date, String paramName) throws DateTimeParseException {
-        if (date == null) {
-            return null;
-        }
-        try {
-            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
-        }
+    public ScrollableListResponse(int count, List<T> items, String scrollId) {
+        this.count = count;
+        this.items = items;
+        this.scrollId = scrollId;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public String getScrollId() {
+        return scrollId;
+    }
+
+    public List<T> getItems() {
+        return items;
     }
 }

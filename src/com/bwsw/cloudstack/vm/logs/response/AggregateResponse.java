@@ -15,25 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.util;
+package com.bwsw.cloudstack.vm.logs.response;
 
-import org.apache.cloudstack.api.ApiErrorCode;
-import org.apache.cloudstack.api.ServerApiException;
+import java.util.List;
+import java.util.Map;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+public class AggregateResponse<T> {
 
-public class ParameterUtils {
+    private final List<T> items;
+    private final int count;
+    private final Map<String, Object> searchAfter;
 
-    public static LocalDateTime parseDate(String date, String paramName) throws DateTimeParseException {
-        if (date == null) {
-            return null;
-        }
-        try {
-            return LocalDateTime.parse(date, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (DateTimeParseException e) {
-            throw new ServerApiException(ApiErrorCode.PARAM_ERROR, "\"" + paramName + "\" parameter is invalid");
-        }
+    public AggregateResponse(List<T> items, int count, Map<String, Object> searchAfter) {
+        this.items = items;
+        this.count = count;
+        this.searchAfter = searchAfter;
+    }
+
+    public List<T> getItems() {
+        return items;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public Map<String, Object> getSearchAfter() {
+        return searchAfter;
     }
 }
