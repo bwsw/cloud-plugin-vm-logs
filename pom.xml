@@ -24,12 +24,12 @@
     <parent>
         <artifactId>cloudstack-plugins</artifactId>
         <groupId>org.apache.cloudstack</groupId>
-        <version>4.11.1.0-SNAPSHOT</version>
+        <version>4.11.1.0</version>
     </parent>
 
     <groupId>com.bwsw</groupId>
     <artifactId>cloud-plugin-vm-logs</artifactId>
-
+    <version>4.11.1.0-SNAPSHOT</version>
     <name>Apache CloudStack Plugin - VM logs</name>
     <description>API plugin for Apache CloudStack to process and view virtual machine logs</description>
     <url>https://git.bw-sw.com/cloudstack-ecosystem/cloud-plugin-vm-logs</url>
