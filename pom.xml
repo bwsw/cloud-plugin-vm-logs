@@ -20,7 +20,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <artifactId>cloudstack-plugins</artifactId>
         <groupId>org.apache.cloudstack</groupId>
@@ -29,12 +29,55 @@
 
     <groupId>com.bwsw</groupId>
     <artifactId>cloud-plugin-vm-logs</artifactId>
+
     <name>Apache CloudStack Plugin - VM logs</name>
+    <description>API plugin for Apache CloudStack to process and view virtual machine logs</description>
+    <url>https://git.bw-sw.com/cloudstack-ecosystem/cloud-plugin-vm-logs</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Bitworks Software, Ltd.</name>
+        <url>http://bitworks.software/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <name>bitworks</name>
+            <email>bitworks@bw-sw.com</email>
+            <organization>Bitworks Software, Ltd.</organization>
+            <organizationUrl>http://bitworks.software/</organizationUrl>
+        </developer>
+    </developers>
+
+    <mailingLists/>
+    
+    <scm>
+        <connection>scm:git:https://git.bw-sw.com/cloudstack-ecosystem/cloud-plugin-vm-logs.git</connection>
+        <developerConnection>scm:git:git@git.bw-sw.com:2222/cloudstack-ecosystem/cloud-plugin-vm-logs.git</developerConnection>
+        <url>https://git.bw-sw.com/cloudstack-ecosystem/cloud-plugin-vm-logs</url>
+    </scm>
 
     <properties>
         <elasticsearch.version>6.2.4</elasticsearch.version>
         <jackson.version>2.9.5</jackson.version>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>

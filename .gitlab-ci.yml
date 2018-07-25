@@ -1,0 +1,55 @@
+image: maven:3.5.4
+
+stages:
+  - prepare
+  - build
+  - test
+  - deploy
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml"
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  GIT_SUBMODULE_STRATEGY: recursive
+  CLOUDSTACK_VERSION: "4.11.0.0"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+prepare:
+  stage: prepare
+  before_script:
+    - cd cloudstack
+    - git checkout "$CLOUDSTACK_VERSION"
+  script:
+    - cd .. && mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout || (cd cloudstack && mvn -Pdeveloper -DskipTests clean install)
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean compile
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+
+deploy:
+  stage: deploy
+  script:
+    - mvn $MAVEN_CLI_OPTS deploy
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+  only:
+    - master
