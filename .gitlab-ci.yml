@@ -24,10 +24,6 @@ prepare:
   stage: prepare
   before_script:
     - cd cloudstack
-    - mkdir -p ~/.ssh
-    - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
-    - ssh-keyscan -t rsa,dsa,ecdsa github.com > ~/.ssh/known_hosts
-    - chmod -R go-rwx ~/.ssh/
     - git checkout "$CLOUDSTACK_VERSION"~1
   script:
     - cd .. && mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout || (cd cloudstack && mvn -Pdeveloper -DskipTests clean install)
@@ -66,6 +62,10 @@ mirror-master:
   only:
     - master
   script:
+    - mkdir -p ~/.ssh
+    - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
+    - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
+    - chmod -R go-rwx ~/.ssh/
     - git remote add upstream $UPSTREAM_REPOSITORY || true
     - git fetch upstream
     - git push --progress upstream HEAD:$UPSTREAM_BRANCH
