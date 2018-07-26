@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - deploy
+  - mirror
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml"
@@ -61,7 +62,7 @@ deploy:
     - master
 
 mirror-master:
-  stage: deploy
+  stage: mirror
   only:
     - master
   script:
