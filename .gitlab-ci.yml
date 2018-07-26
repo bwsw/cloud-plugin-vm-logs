@@ -66,9 +66,9 @@ mirror-master:
     - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
-    - git remote add upstream $UPSTREAM_REPOSITORY || true
-    - git fetch upstream
-    - git push --progress upstream HEAD:$UPSTREAM_BRANCH
+    - git remote add github $UPSTREAM_REPOSITORY || true
+    - git fetch github
+    - git push --progress github HEAD:$UPSTREAM_BRANCH
   tags:
     - build-in-docker
     - cs-eco-builder
