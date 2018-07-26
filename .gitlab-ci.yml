@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - deploy
+  - mirror
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml"
@@ -25,6 +26,7 @@ prepare:
     - cd cloudstack
     - mkdir -p ~/.ssh
     - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
+    - ssh-keyscan -t rsa,dsa,ecdsa github.com > ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
     - git checkout "$CLOUDSTACK_VERSION"~1
   script:
@@ -60,7 +62,7 @@ deploy:
     - master
 
 mirror-master:
-  stage: deploy
+  stage: mirror
   only:
     - master
   script:
