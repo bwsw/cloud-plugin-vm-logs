@@ -72,6 +72,7 @@ mirror-master:
     - echo $GITHUB_MIRROR_PUBLIC  > ~/.ssh/id_rsa.pub
     - cat ~/.ssh/id_rsa
     - cat ~/.ssh/id_rsa.pub
+    - whoami
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
     - ssh -T git@github.com
