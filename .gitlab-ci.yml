@@ -63,6 +63,7 @@ mirror-master:
     GIT_STRATEGY: clone
     UPSTREAM_REPOSITORY: "git@github.com:bwsw/cloud-plugin-vm-logs.git"
     UPSTREAM_BRANCH: "master"
+  cache: {}
   only:
     - master
   script:
