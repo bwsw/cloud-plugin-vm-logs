@@ -11,6 +11,8 @@ variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
   GIT_SUBMODULE_STRATEGY: recursive
   CLOUDSTACK_VERSION: "4.11.1.0"
+  UPSTREAM_REPOSITORY: "git@github.com:bwsw/cloud-plugin-vm-logs.git"
+  UPSTREAM_BRANCH: "master"
 
 cache:
   paths:
@@ -21,6 +23,9 @@ prepare:
   stage: prepare
   before_script:
     - cd cloudstack
+    - mkdir -p ~/.ssh
+    - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
+    - chmod -R go-rwx ~/.ssh/
     - git checkout "$CLOUDSTACK_VERSION"~1
   script:
     - cd .. && mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout || (cd cloudstack && mvn -Pdeveloper -DskipTests clean install)
@@ -53,3 +58,16 @@ deploy:
     - cs-eco-builder
   only:
     - master
+
+mirror-master:
+  stage: deploy
+  only:
+    - master
+  script:
+    - git remote add upstream $UPSTREAM_REPOSITORY || true
+    - git fetch upstream
+    - git push --progress upstream HEAD:$UPSTREAM_BRANCH
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+
