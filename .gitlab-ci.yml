@@ -59,6 +59,9 @@ deploy:
 
 mirror-master:
   stage: mirror
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    GIT_STRATEGY: clone
   only:
     - master
   script:
