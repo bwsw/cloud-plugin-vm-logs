@@ -138,6 +138,47 @@ If SSL or user authentification are required Elasticsearch output plugin should 
 
 If throttling for VM logs are required Throttle filter plugin should be used (see https://www.elastic.co/guide/en/logstash/6.2/plugins-filters-throttle.html). 
 
+Configuration example:
+
+```
+input {
+  beats {
+    port => 5045
+  }
+}
+
+# GRANT SELECT on cloud.vm_instance TO logstash@'localhost' IDENTIFIED BY 'ciwupocOolv9';
+
+filter {
+  jdbc_streaming {
+    jdbc_driver_library => "/usr/share/java/mysql-connector-java-5.1.38.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/cloud"
+    jdbc_user => "logstash"
+    jdbc_password => "ciwupocOolv9"
+    jdbc_validate_connection => true
+    statement => "select id from vm_instance WHERE uuid = :uuid"
+    parameters => { "uuid" => "vm_uuid"}
+    target => "vm_id"
+    tag_on_failure => ["vm_uuid_failure"]
+    tag_on_default_use => ["vm_uuid_unknown"]
+  }
+  if "vm_uuid_unknown" in [tags] and "vm_uuid_failure" not in [tags] {
+    drop {
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => "localhost:9200"
+    index => "vmlog-%{[vm_uuid]}-%{+YYYY-MM-dd}"
+    ssl => false
+  }
+}
+
+```
+
 * Filebeat 6.2
 
 Filebeat should be used in virtual machines for log processing.
