@@ -23,9 +23,9 @@ prepare:
   stage: prepare
   before_script:
     - cd cloudstack
-    - mkdir -p ~/.ssh && chmod 600 ~/.ssh
-    - echo $GITHUB_MIRROR_PRIVATE > ~/ssh/id_rsa
-    - chmod 600 ~/ssh/id_rsa
+    - mkdir -p ~/.ssh
+    - echo $GITHUB_MIRROR_PRIVATE > ~/.ssh/id_rsa
+    - chmod -R go-rwx ~/.ssh/
     - git checkout "$CLOUDSTACK_VERSION"~1
   script:
     - cd .. && mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout || (cd cloudstack && mvn -Pdeveloper -DskipTests clean install)
