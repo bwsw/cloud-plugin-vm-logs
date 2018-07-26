@@ -70,9 +70,8 @@ mirror-master:
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
     - pwd
-    - git remote
     - git remote add github $UPSTREAM_REPOSITORY || true
-    - git remote
+    - git remote show github
     - git fetch github
     - git push -f --progress github HEAD:$UPSTREAM_BRANCH
   tags:
