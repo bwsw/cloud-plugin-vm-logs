@@ -76,7 +76,7 @@ mirror-master:
     - ls -la
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
-    - ssh -T git@github.com
+    - ssh -vT git@github.com
     - git remote add mirror $UPSTREAM_REPOSITORY
     - git remote show mirror
     - git fetch mirror
