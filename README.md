@@ -1,98 +1,29 @@
 Apache CloudStack Plugin for virtual machine logs
 ==============
 
-This project provides API plugin for Apache CloudStack to process and view virtual machine logs.
+This plugin provides API plugin for Apache CloudStack to process and view virtual machine logs which are handled by ELK and delivered by Filebeat. 
 The version of the plugin matches Apache CloudStack version that it is build for.
 
-* [API](#api)
+The plugin is developed and tested only with Apache CloudStack 4.11+
+
+* [Installing into CloudStack](#acs-install)
 * [Plugin settings](#plugin-settings)
-* [Deployment](#deployment)
+* [ELK Configuration](#elk-configuration)
+* [API](#api)
 
-# API
+# Installing into CloudStack
 
-The plugin provides following API commands to view virtual machine logs:
+Create lib directory in your ACS management server hierarchy. In Ubuntu installation which is based on deb package:
 
-* [listVmLogFiles](#listvmlogfiles)
-* [getVmLogs](#getvmlogs)
-* [scrollVmLogs](#scrollvmlogs)
+```
+mkdir -p /usr/share/cloudstack-management/webapp/WEB-INF/lib
+cd /usr/share/cloudstack-management/webapp/WEB-INF/lib
+```
 
-## Commands
+Download the plugin jar file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1).
+ 
 
-### listVmLogFiles
 
-Lists available log files for the virtual machine.
-
-**Request parameters**
-
-| Parameter Name | Description | Required |
-| -------------- | ----------- | -------- |
-| id | the ID of the virtual machine | true |
-| startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| page | the requested page of the result listing | false |
-| pagesize | the size for result listing | false | 
-
-**Response tags**
-
-| Response Name | Description |
-| -------------- | ---------- |
-| file | the log file name |
-
-### getVmLogs
-
-Retrieves logs for the virtual machine.
-
-**Request parameters**
-
-| Parameter Name | Description | Required |
-| -------------- | ----------- | -------- |
-| id | the ID of the virtual machine | true |
-| startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| keywords | keywords (AND operator if multiple keywords are specified) | false |
-| logfile | the log file | false |
-| sort | comma separated list of response tags optionally prefixed with - for descending order | false |
-| page | the requested page of the result listing | false |
-| pagesize | the size for result listing | false |
-| scroll | timeout in ms for subsequent scroll requests | false | 
-
-If both page/pagesize and scroll parameters are specified scroll is used.
-
-Sorting and filtering for _file_ and _log_ tags in responses is applied to 256 first characters. 
-The information how to change the limit can be found at [deployment section](#deployment).  
-
-**Response tags**
-
-See [VM log response tags](#vm-log-response-tags).
-
-### scrollVmLogs
-
-Retrieves next batch of logs for the virtual machine.
-
-**Request parameters**
-
-| Parameter Name | Description | Required |
-| -------------- | ----------- | -------- |
-| scrollid | the tag to request next batch of logs | true |
-| timeout | timeout in ms for subsequent scroll requests | true | 
-
-**Response tags**
-
-See [VM log response tags](#vm-log-response-tags).
-
-## Response tags
-
-### VM log response tags
-
-| Response Name | Description |
-| -------------- | ---------- |
-| vmlogs | the log listing |
-| &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
-| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next batch of logs |
 
 # Plugin settings
 
@@ -106,7 +37,7 @@ See [VM log response tags](#vm-log-response-tags).
 *default.page.size* is used as a default value for pagesize parameter in [listVmLogFiles](#listvmlogfiles) command. Its value should be less or equal to Elasticsearch 
 *index.max_result_window* otherwise listVmLogFiles requests without pagesize parameter will fail.
   
-# Deployment
+# ELK Configuration
 
 Following components should be deployed:
 
@@ -203,3 +134,90 @@ In the template following placeholders should be replaced with real values:
 | -------------- | ---------- |
 | %TIMEOUT% | a client timeout in seconds |
 | %DAYS% | a number of days to store VM logs |
+
+
+# API
+
+The plugin provides following API commands to view virtual machine logs:
+
+* [listVmLogFiles](#listvmlogfiles)
+* [getVmLogs](#getvmlogs)
+* [scrollVmLogs](#scrollvmlogs)
+
+## Commands
+
+### listVmLogFiles
+
+Lists available log files for the virtual machine.
+
+**Request parameters**
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| id | the ID of the virtual machine | true |
+| startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
+| enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
+| page | the requested page of the result listing | false |
+| pagesize | the size for result listing | false | 
+
+**Response tags**
+
+| Response Name | Description |
+| -------------- | ---------- |
+| file | the log file name |
+
+### getVmLogs
+
+Retrieves logs for the virtual machine.
+
+**Request parameters**
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| id | the ID of the virtual machine | true |
+| startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
+| enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
+| keywords | keywords (AND operator if multiple keywords are specified) | false |
+| logfile | the log file | false |
+| sort | comma separated list of response tags optionally prefixed with - for descending order | false |
+| page | the requested page of the result listing | false |
+| pagesize | the size for result listing | false |
+| scroll | timeout in ms for subsequent scroll requests | false | 
+
+If both page/pagesize and scroll parameters are specified scroll is used.
+
+Sorting and filtering for _file_ and _log_ tags in responses is applied to 256 first characters. 
+The information how to change the limit can be found at [deployment section](#deployment).  
+
+**Response tags**
+
+See [VM log response tags](#vm-log-response-tags).
+
+### scrollVmLogs
+
+Retrieves next batch of logs for the virtual machine.
+
+**Request parameters**
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| scrollid | the tag to request next batch of logs | true |
+| timeout | timeout in ms for subsequent scroll requests | true | 
+
+**Response tags**
+
+See [VM log response tags](#vm-log-response-tags).
+
+## Response tags
+
+### VM log response tags
+
+| Response Name | Description |
+| -------------- | ---------- |
+| vmlogs | the log listing |
+| &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
+| &nbsp;&nbsp;&nbsp;&nbsp;scrollid | the tag to request next batch of logs |
