@@ -68,8 +68,8 @@ mirror-master:
     - master
   script:
     - mkdir -p ~/.ssh
-    - echo $GITHUB_MIRROR_PRIVATE > /root/.ssh/id_rsa
-    - echo $GITHUB_MIRROR_PUBLIC  > /root/.ssh/id_rsa.pub
+    - echo $GITHUB_MIRROR_PRIVATE | base64 -d > /root/.ssh/id_rsa
+    - echo $GITHUB_MIRROR_PUBLIC > /root/.ssh/id_rsa.pub
     - cat /root/.ssh/id_rsa
     - cat /root/.ssh/id_rsa.pub
     - whoami
