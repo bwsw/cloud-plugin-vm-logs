@@ -67,3 +67,7 @@ mirror-master:
     - git remote add upstream $UPSTREAM_REPOSITORY || true
     - git fetch upstream
     - git push --progress upstream HEAD:$UPSTREAM_BRANCH
+  tags:
+    - build-in-docker
+    - cs-eco-builder
+
