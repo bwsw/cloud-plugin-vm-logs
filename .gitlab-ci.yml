@@ -73,6 +73,7 @@ mirror-master:
     - cat ~/.ssh/id_rsa
     - cat ~/.ssh/id_rsa.pub
     - whoami
+    - ls -la
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> ~/.ssh/known_hosts
     - chmod -R go-rwx ~/.ssh/
     - ssh -T git@github.com
