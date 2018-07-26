@@ -155,7 +155,7 @@ filter {
     jdbc_driver_class => "com.mysql.jdbc.Driver"
     jdbc_connection_string => "jdbc:mysql://localhost:3306/cloud"
     jdbc_user => "logstash"
-    jdbc_password => "ciwupocOolv9"
+    jdbc_password => "xxxxxxxxxx"
     jdbc_validate_connection => true
     statement => "select id from vm_instance WHERE uuid = :uuid"
     parameters => { "uuid" => "vm_uuid"}
