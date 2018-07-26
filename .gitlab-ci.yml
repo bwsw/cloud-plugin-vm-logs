@@ -73,9 +73,9 @@ mirror-master:
     - cat /root/.ssh/id_rsa
     - cat /root/.ssh/id_rsa.pub
     - whoami
-    - ls -la
     - ssh-keyscan -t rsa,dsa,ecdsa github.com >> /root/.ssh/known_hosts
-    - chmod -R go-rwx /root/.ssh/
+    - chmod -R go-rwx /root/.ssh
+    - ls -la /root/.ssh
     - ssh -vT git@github.com
     - git remote add mirror $UPSTREAM_REPOSITORY
     - git remote show mirror
