@@ -110,14 +110,14 @@ See [VM log response tags](#vm-log-response-tags).
 
 Following components should be deployed:
 
-* ElasticSearch 6.2
+## ElasticSearch 6.2
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
-* Logstash 6.2
+## Logstash 6.2
 
 The official documentation can be found at https://www.elastic.co/guide/en/logstash/6.2/index.html.
 
@@ -179,7 +179,7 @@ output {
 
 ```
 
-* Filebeat 6.2
+## Filebeat 6.2
 
 Filebeat should be used in virtual machines for log processing.
 
@@ -189,7 +189,7 @@ Filebeat configuration should contain a field *vm_uuid* that is the ID of the vi
 
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
-* Curator 5.5
+## Curator 5.5
 
 Curator is used to delete old virtual machine logs.
 
