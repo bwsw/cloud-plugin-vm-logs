@@ -1,11 +1,12 @@
 image: maven:3.5.4
 
 stages:
-  - mirror
   - prepare
   - build
   - test
   - deploy
+  - mirror
+
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml"
