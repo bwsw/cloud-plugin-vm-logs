@@ -20,7 +20,8 @@ mkdir -p /usr/share/cloudstack-management/webapp/WEB-INF/lib
 cd /usr/share/cloudstack-management/webapp/WEB-INF/lib
 ```
 
-Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1).
+Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1). 
+Please, find the last published.
  
 # Plugin settings
 
@@ -38,16 +39,24 @@ Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonat
 
 Following components should be deployed:
 
-## ElasticSearch 6.2
+## ElasticSearch 6.2.4
+
+```
+Version recommended: 6.2.4
+```
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
-## Logstash 6.2
+## Logstash 6.3
 
-The official documentation can be found at https://www.elastic.co/guide/en/logstash/6.2/index.html.
+```
+Version recommended: 6.3.2
+```
+
+The official documentation can be found at https://www.elastic.co/guide/en/logstash/6.3/index.html.
 
 The [log pipeline](deployment/vmlogs-logstash.conf) should be used for VM log processing.
 
@@ -107,11 +116,16 @@ output {
 
 ```
 
-## Filebeat 6.2
+## Filebeat 6.3
+
+```
+Version recommended: 6.3.2
+```
+
 
 Filebeat should be used in virtual machines for log processing.
 
-The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.2/index.html
+The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.3/index.html
 
 Filebeat configuration should contain a field *vm_uuid* that is the ID of the virtual machine, *fields_under_root* equal to true and Logstash output.
 
