@@ -4,7 +4,7 @@ Apache CloudStack Plugin for virtual machine logs
 This plugin provides API plugin for Apache CloudStack to process and view virtual machine logs which are handled by ELK and delivered by Filebeat. 
 The version of the plugin matches Apache CloudStack version that it is build for.
 
-The plugin is developed and tested only with Apache CloudStack 4.11+
+The plugin is developed and tested only with Apache CloudStack 4.11.1
 
 * [Installing into CloudStack](#installing-into-cloudstack)
 * [Plugin settings](#plugin-settings)
@@ -192,7 +192,7 @@ Retrieves logs for the virtual machine.
 | id | the ID of the virtual machine | true |
 | startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
 | enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| keywords | keywords (AND operator if multiple keywords are specified) | false |
+| keywords | comma separated list of keywords (AND logical operator is used if multiple keywords are specified) | false |
 | logfile | the log file | false |
 | sort | comma separated list of response tags optionally prefixed with - for descending order | false |
 | page | the requested page of the result listing | false |
