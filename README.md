@@ -6,7 +6,7 @@ The version of the plugin matches Apache CloudStack version that it is build for
 
 The plugin is developed and tested only with Apache CloudStack 4.11+
 
-* [Installing into CloudStack](#acs-install)
+* [Installing into CloudStack](#installing-into-cloudstack)
 * [Plugin settings](#plugin-settings)
 * [ELK Configuration](#elk-configuration)
 * [API](#api)
@@ -20,11 +20,8 @@ mkdir -p /usr/share/cloudstack-management/webapp/WEB-INF/lib
 cd /usr/share/cloudstack-management/webapp/WEB-INF/lib
 ```
 
-Download the plugin jar file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1).
+Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1).
  
-
-
-
 # Plugin settings
 
 | Name | Description | Default value |
@@ -78,7 +75,7 @@ input {
   }
 }
 
-# GRANT SELECT on cloud.vm_instance TO logstash@'localhost' IDENTIFIED BY 'ciwupocOolv9';
+# GRANT SELECT on cloud.vm_instance TO logstash@'localhost' IDENTIFIED BY 'xxxxxxxxxx';
 
 filter {
   jdbc_streaming {
@@ -134,7 +131,6 @@ In the template following placeholders should be replaced with real values:
 | -------------- | ---------- |
 | %TIMEOUT% | a client timeout in seconds |
 | %DAYS% | a number of days to store VM logs |
-
 
 # API
 
