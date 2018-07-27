@@ -21,7 +21,12 @@ cd /usr/share/cloudstack-management/webapp/WEB-INF/lib
 ```
 
 Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1). 
-Please, find the last published.
+
+E.g
+```
+cloud-plugin-vm-logs-4.11.1.0-20180727.075513-11-jar-with-dependencies.jar
+```
+
  
 # Plugin settings
 
