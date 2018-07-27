@@ -4,7 +4,7 @@ Apache CloudStack Plugin for virtual machine logs
 This plugin provides API plugin for Apache CloudStack to process and view virtual machine logs which are handled by ELK and delivered by Filebeat. 
 The version of the plugin matches Apache CloudStack version that it is build for.
 
-The plugin is developed and tested only with Apache CloudStack 4.11+
+The plugin is developed and tested only with Apache CloudStack 4.11.1
 
 * [Installing into CloudStack](#installing-into-cloudstack)
 * [Plugin settings](#plugin-settings)
@@ -20,7 +20,13 @@ mkdir -p /usr/share/cloudstack-management/webapp/WEB-INF/lib
 cd /usr/share/cloudstack-management/webapp/WEB-INF/lib
 ```
 
-Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1).
+Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonatype.org/content/groups/public/com/bwsw/cloud-plugin-vm-logs/) which corresponds to your ACS version (e.g. 4.11.1). 
+
+E.g
+```
+cloud-plugin-vm-logs-4.11.1.0-20180727.075513-11-jar-with-dependencies.jar
+```
+
  
 # Plugin settings
 
@@ -38,16 +44,24 @@ Download the plugin jar with dependencies file from OSS Nexus (https://oss.sonat
 
 Following components should be deployed:
 
-## ElasticSearch 6.2
+## ElasticSearch 6.2.4
+
+```
+Version recommended: 6.2.4
+```
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
-## Logstash 6.2
+## Logstash 6.3
 
-The official documentation can be found at https://www.elastic.co/guide/en/logstash/6.2/index.html.
+```
+Version recommended: 6.3.2
+```
+
+The official documentation can be found at https://www.elastic.co/guide/en/logstash/6.3/index.html.
 
 The [log pipeline](deployment/vmlogs-logstash.conf) should be used for VM log processing.
 
@@ -107,11 +121,16 @@ output {
 
 ```
 
-## Filebeat 6.2
+## Filebeat 6.3
+
+```
+Version recommended: 6.3.2
+```
+
 
 Filebeat should be used in virtual machines for log processing.
 
-The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.2/index.html
+The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.3/index.html
 
 Filebeat configuration should contain a field *vm_uuid* that is the ID of the virtual machine, *fields_under_root* equal to true and Logstash output.
 
@@ -173,7 +192,7 @@ Retrieves logs for the virtual machine.
 | id | the ID of the virtual machine | true |
 | startdate | the start date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
 | enddate | the end date/time in UTC, yyyy-MM-ddTHH:mm:ss | false |
-| keywords | keywords (AND operator if multiple keywords are specified) | false |
+| keywords | comma separated list of keywords (AND logical operator is used if multiple keywords are specified) | false |
 | logfile | the log file | false |
 | sort | comma separated list of response tags optionally prefixed with - for descending order | false |
 | page | the requested page of the result listing | false |
