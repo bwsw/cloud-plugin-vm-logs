@@ -25,7 +25,7 @@ prepare:
   stage: prepare
   before_script:
     - cd cloudstack
-    - git checkout "$CLOUDSTACK_VERSION"~1
+    - git checkout "$CLOUDSTACK_VERSION"
   script:
     - cd .. && mvn $MAVEN_CLI_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout || (cd cloudstack && mvn -Pdeveloper -DskipTests clean install)
   tags:
