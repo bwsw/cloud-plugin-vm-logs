@@ -58,7 +58,7 @@
     <properties>
         <cloudstack.version>4.11.1.0</cloudstack.version>
         <elasticsearch.version>6.2.4</elasticsearch.version>
-        <jackson.version>2.9.5</jackson.version>
+        <jackson.version>2.9.2</jackson.version>
     </properties>
 
     <distributionManagement>
@@ -182,11 +182,13 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>${jackson.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>

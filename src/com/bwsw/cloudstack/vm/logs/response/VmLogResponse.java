@@ -20,7 +20,6 @@ package com.bwsw.cloudstack.vm.logs.response;
 import com.bwsw.cloudstack.vm.logs.entity.EntityConstants;
 import com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilder;
 import com.cloud.serializer.Param;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import org.apache.cloudstack.api.BaseResponse;
@@ -28,20 +27,17 @@ import org.apache.cloudstack.api.BaseResponse;
 public class VmLogResponse extends BaseResponse {
 
     @Param(description = "the log event timestamp")
-    @JsonAlias(VmLogRequestBuilder.DATE_FIELD)
-    @JsonProperty(EntityConstants.TIMESTAMP)
+    @JsonProperty(VmLogRequestBuilder.DATE_FIELD)
     @SerializedName(EntityConstants.TIMESTAMP)
     private String timestamp;
 
     @Param(description = "the log file")
-    @JsonAlias(VmLogRequestBuilder.LOG_FILE_FIELD)
-    @JsonProperty(EntityConstants.FILE)
+    @JsonProperty(VmLogRequestBuilder.LOG_FILE_FIELD)
     @SerializedName(EntityConstants.FILE)
     private String file;
 
     @Param(description = "the log data")
-    @JsonAlias(VmLogRequestBuilder.DATA_FIELD)
-    @JsonProperty(EntityConstants.LOG)
+    @JsonProperty(VmLogRequestBuilder.DATA_FIELD)
     @SerializedName(EntityConstants.LOG)
     private String log;
 
