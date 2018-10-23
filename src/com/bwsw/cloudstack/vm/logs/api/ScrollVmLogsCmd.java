@@ -39,7 +39,7 @@ public class ScrollVmLogsCmd extends BaseCmd {
 
     public static final String API_NAME = "scrollVmLogs";
 
-    @Parameter(name = "scrollid", type = CommandType.STRING, required = true, description = "scroll id", length = 1024)
+    @Parameter(name = "scrollid", type = CommandType.STRING, required = true, description = "scroll id", length = Integer.MAX_VALUE)
     private String scrollId;
 
     @Parameter(name = "timeout", type = CommandType.INTEGER, required = true, description = "timeout in ms for subsequent scroll requests")
