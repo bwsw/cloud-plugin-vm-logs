@@ -19,6 +19,7 @@ package com.bwsw.cloudstack.vm.logs.service;
 
 import com.bwsw.cloudstack.vm.logs.entity.SortField;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.common.unit.TimeValue;
@@ -45,6 +46,8 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
     private static final String[] FIELDS = new String[] {LOG_FILE_FIELD, DATA_FIELD, DATE_FIELD};
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String LOG_FILE_KEYWORD_FIELD = LOG_FILE_FIELD + ".keyword";
+    private static final String[] WILDCARD_CHARS = new String[] {"*", "?", "\\"};
+    private static final String[] WILDCARD_ESCAPED_CHARS = new String[] {"\\*", "\\?", "\\\\"};
 
     @Override
     public SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Integer timeout, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile,
@@ -76,8 +79,8 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
             queryBuilder.filter(QueryBuilders.termQuery(LOG_FILE_KEYWORD_FIELD, logFile));
         }
         if (keywords != null && !keywords.isEmpty()) {
-            keywords.forEach(e -> queryBuilder.must(QueryBuilders.matchQuery(DATA_FIELD, e)));
-
+            keywords.forEach(e -> queryBuilder
+                    .must(QueryBuilders.wildcardQuery(DATA_SEARCH_FIELD, StringUtils.wrap(StringUtils.replaceEach(e, WILDCARD_CHARS, WILDCARD_ESCAPED_CHARS), '*'))));
         }
         if (queryBuilder.hasClauses()) {
             sourceBuilder.query(queryBuilder);

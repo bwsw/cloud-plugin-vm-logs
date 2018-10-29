@@ -47,7 +47,9 @@ Version recommended: 6.2.4
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
-If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _logstash_ template for an index pattern 
+[VM log template](deployment/vmlogs-elasticsearch-template.json) must be created in ElasticSearch.
+
+If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _VM log template_ for an index pattern
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
 ## Logstash 6.3
