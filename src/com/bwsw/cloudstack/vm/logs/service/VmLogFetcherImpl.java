@@ -17,12 +17,12 @@
 
 package com.bwsw.cloudstack.vm.logs.service;
 
+import com.bwsw.cloudstack.vm.logs.entity.ResponseEntity;
 import com.bwsw.cloudstack.vm.logs.response.AggregateResponse;
 import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
 import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
 import com.cloud.utils.exception.CloudRuntimeException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.cloudstack.api.ResponseObject;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
@@ -45,12 +45,12 @@ public class VmLogFetcherImpl implements VmLogFetcher {
     private final ObjectMapper _objectMapper = new ObjectMapper();
 
     @Override
-    public <T extends ResponseObject> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass) throws IOException {
+    public <T extends ResponseEntity> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass) throws IOException {
         return parseSearch(client.search(request), elementClass);
     }
 
     @Override
-    public <T extends ResponseObject> ScrollableListResponse<T> scroll(RestHighLevelClient client, SearchScrollRequest request, Class<T> elementClass) throws IOException {
+    public <T extends ResponseEntity> ScrollableListResponse<T> scroll(RestHighLevelClient client, SearchScrollRequest request, Class<T> elementClass) throws IOException {
         return parseSearch(client.searchScroll(request), elementClass);
     }
 
@@ -90,15 +90,17 @@ public class VmLogFetcherImpl implements VmLogFetcher {
         return new AggregateResponse<>(responses, (int)((Cardinality)countAggregation).getValue(), compositeAggregation.afterKey());
     }
 
-    private <T> List<T> parseResults(SearchResponse response, Class<T> elementClass) throws IOException {
+    private <T extends ResponseEntity> List<T> parseResults(SearchResponse response, Class<T> elementClass) throws IOException {
         List<T> results = new ArrayList<>();
         for (SearchHit searchHit : response.getHits()) {
-            results.add(_objectMapper.readValue(searchHit.getSourceAsString(), elementClass));
+            T element = _objectMapper.readValue(searchHit.getSourceAsString(), elementClass);
+            element.setId(searchHit.getId());
+            results.add(element);
         }
         return results;
     }
 
-    private <T extends ResponseObject> ScrollableListResponse<T> parseSearch(SearchResponse response, Class<T> elementClass) throws IOException {
+    private <T extends ResponseEntity> ScrollableListResponse<T> parseSearch(SearchResponse response, Class<T> elementClass) throws IOException {
         if (response.status() != RestStatus.OK || response.getHits() == null) {
             throw new CloudRuntimeException("Failed to retrieve VM logs");
         }

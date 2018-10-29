@@ -18,13 +18,20 @@
 package com.bwsw.cloudstack.vm.logs.response;
 
 import com.bwsw.cloudstack.vm.logs.entity.EntityConstants;
+import com.bwsw.cloudstack.vm.logs.entity.ResponseEntity;
 import com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilder;
 import com.cloud.serializer.Param;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import org.apache.cloudstack.api.BaseResponse;
 
-public class VmLogResponse extends BaseResponse {
+public class VmLogResponse extends BaseResponse implements ResponseEntity {
+
+    @Param(description = "the log id")
+    @JsonIgnore
+    @SerializedName(EntityConstants.ID)
+    private String id;
 
     @Param(description = "the log event timestamp")
     @JsonProperty(VmLogRequestBuilder.DATE_FIELD)
@@ -40,6 +47,14 @@ public class VmLogResponse extends BaseResponse {
     @JsonProperty(VmLogRequestBuilder.DATA_FIELD)
     @SerializedName(EntityConstants.LOG)
     private String log;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTimestamp() {
         return timestamp;
