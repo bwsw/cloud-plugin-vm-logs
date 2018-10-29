@@ -17,10 +17,10 @@
 
 package com.bwsw.cloudstack.vm.logs.service;
 
+import com.bwsw.cloudstack.vm.logs.entity.ResponseEntity;
 import com.bwsw.cloudstack.vm.logs.response.AggregateResponse;
 import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
 import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
-import org.apache.cloudstack.api.ResponseObject;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -29,9 +29,9 @@ import java.io.IOException;
 
 public interface VmLogFetcher {
 
-    <T extends ResponseObject> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass) throws IOException;
+    <T extends ResponseEntity> ScrollableListResponse<T> fetch(RestHighLevelClient client, SearchRequest request, Class<T> elementClass) throws IOException;
 
-    <T extends ResponseObject> ScrollableListResponse<T> scroll(RestHighLevelClient client, SearchScrollRequest request, Class<T> elementClass) throws IOException;
+    <T extends ResponseEntity> ScrollableListResponse<T> scroll(RestHighLevelClient client, SearchScrollRequest request, Class<T> elementClass) throws IOException;
 
     AggregateResponse<VmLogFileResponse> fetchLogFiles(RestHighLevelClient client, SearchRequest request) throws IOException;
 }

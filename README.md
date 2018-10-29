@@ -227,6 +227,7 @@ See [VM log response tags](#vm-log-response-tags).
 | vmlogs | the log listing |
 | &nbsp;&nbsp;&nbsp;&nbsp;count | the total number of log entries |
 | &nbsp;&nbsp;&nbsp;&nbsp;items(*) | log entries |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id | the log id |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestamp | the date/time of log event registration |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file | the log file |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log | the log data |
