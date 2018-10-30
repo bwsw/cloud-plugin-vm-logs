@@ -61,8 +61,7 @@ public class VmLogRequestBuilderImplTest {
     public static Object[][] filters() {
         return new Object[][] {{LocalDateTime.of(2018, 5, 1, 10, 0, 0), null, null, null, "start-date-vm-log-query.json"},
                 {null, LocalDateTime.of(2018, 5, 31, 12, 0, 0), null, null, "end-date-vm-log-query.json"},
-                {null, null, ImmutableList.of("one", "two"), null, "keywords-vm-log-query.json"},
-                {null, null, null, "/var/log/app.log", "logfile-vm-log-query.json"},
+                {null, null, ImmutableList.of("one * ? \\", "two"), null, "keywords-vm-log-query.json"}, {null, null, null, "/var/log/app.log", "logfile-vm-log-query.json"},
                 {LocalDateTime.of(2018, 5, 1, 0, 0, 0), LocalDateTime.of(2018, 5, 31, 23, 59, 59), ImmutableList.of("search_keyword"), "/var/log/app.log",
                         "complex-vm-log-query.json"}};
     }

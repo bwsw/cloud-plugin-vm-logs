@@ -32,6 +32,7 @@ public interface VmLogRequestBuilder {
     String LOG_FILE_SORT_FIELD = "source.keyword";
     String DATA_FIELD = "message";
     String DATA_SORT_FIELD = "message.keyword";
+    String DATA_SEARCH_FIELD = "message.search";
     String LOG_FILE_AGGREGATION = "logfiles";
     String LOG_FILE_COUNT_AGGREGATION = "count_logfiles";
 

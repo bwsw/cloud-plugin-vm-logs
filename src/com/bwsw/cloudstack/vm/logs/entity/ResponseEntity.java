@@ -17,10 +17,11 @@
 
 package com.bwsw.cloudstack.vm.logs.entity;
 
-public class EntityConstants {
+import org.apache.cloudstack.api.ResponseObject;
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
+public interface ResponseEntity extends ResponseObject {
+
+    String getId();
+
+    void setId(String id);
 }
