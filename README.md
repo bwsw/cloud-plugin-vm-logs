@@ -47,7 +47,10 @@ Version recommended: 6.2.4
 
 The official documentation can be found at https://www.elastic.co/guide/en/elasticsearch/reference/6.2/index.html
 
-[VM log template](deployment/vmlogs-elasticsearch-template.json) must be created in ElasticSearch.
+Once ElasticSearch is deployed following actions must be done:
+ 
+* to create [VM log template](deployment/vmlog-index-template.json)
+* to create `vmlog-registry` index using [settings](deployment/vmlog-registry.json)
 
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _VM log template_ for an index pattern
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
@@ -72,6 +75,7 @@ In the template above following placeholders should be replaced with real values
 | %JDBC_USER% | the user for Apache CloudStack database |
 | %JDBC_PASSWORD% | the user's password for Apache CloudStack database |
 | %ELASTICSEARCH_HOSTS% | Elasticsearch hosts to store VM logs |
+| %VMLOG_REGISTRY_QUERY_TEMPLATE% | file path to [Elasticsearch query template](deployment/vmlog-registry-query-template.json) | 
 
 If SSL or user authentification are required Elasticsearch output plugin should be adjusted (see https://www.elastic.co/guide/en/logstash/6.2/plugins-outputs-elasticsearch.html).
 

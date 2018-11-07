@@ -1,0 +1,42 @@
+{
+  "query":{
+    "bool":{
+      "filter":[
+        {
+          "term":{
+            "token":"%{[token]}"
+          }
+        },
+        {
+          "range":{
+            "valid_from":{
+              "lte":"%{[@timestamp]}"
+            }
+          }
+        },
+        {
+          "bool":{
+            "should":[
+              {
+                "range":{
+                  "valid_to":{
+                    "gte":"%{[@timestamp]}"
+                  }
+                }
+              },
+              {
+                "bool" : {
+                  "must_not" : {
+                    "exists": {
+                      "field" : "valid_to"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
