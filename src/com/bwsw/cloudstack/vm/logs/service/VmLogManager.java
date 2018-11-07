@@ -46,4 +46,8 @@ public interface VmLogManager extends PluggableService {
     ScrollableListResponse<VmLogResponse> scrollVmLogs(String scrollId, Integer timeout);
 
     ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize);
+
+    String createToken(Long id);
+
+    boolean invalidateToken(String token);
 }

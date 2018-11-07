@@ -17,24 +17,32 @@
 
 package com.bwsw.cloudstack.vm.logs.service;
 
+import com.bwsw.cloudstack.vm.logs.api.CreateVmLogTokenCmd;
 import com.bwsw.cloudstack.vm.logs.api.GetVmLogsCmd;
+import com.bwsw.cloudstack.vm.logs.api.InvalidateVmLogTokenCmd;
 import com.bwsw.cloudstack.vm.logs.api.ListVmLogFilesCmd;
 import com.bwsw.cloudstack.vm.logs.api.ScrollVmLogsCmd;
 import com.bwsw.cloudstack.vm.logs.entity.EntityConstants;
 import com.bwsw.cloudstack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.entity.Token;
 import com.bwsw.cloudstack.vm.logs.response.AggregateResponse;
 import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
 import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
 import com.bwsw.cloudstack.vm.logs.response.VmLogResponse;
+import com.bwsw.cloudstack.vm.logs.security.TokenGenerator;
+import com.bwsw.cloudstack.vm.logs.util.DateUtils;
 import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
 import com.cloud.exception.InvalidParameterValueException;
+import com.cloud.user.AccountManager;
 import com.cloud.utils.component.ComponentLifecycleBase;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
 import com.google.common.collect.ImmutableMap;
+import org.apache.cloudstack.acl.SecurityChecker;
 import org.apache.cloudstack.api.ApiErrorCode;
 import org.apache.cloudstack.api.ServerApiException;
 import org.apache.cloudstack.api.response.ListResponse;
+import org.apache.cloudstack.context.CallContext;
 import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.Configurable;
 import org.apache.http.HttpHost;
@@ -43,14 +51,18 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.Strings;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +84,13 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     private VmLogRequestBuilder _vmLogRequestBuilder;
 
     @Inject
-    private VmLogFetcher _vmLogFetcher;
+    private VmLogExecutor _vmLogExecutor;
+
+    @Inject
+    private TokenGenerator _tokenGenerator;
+
+    @Inject
+    private AccountManager _accountManager;
 
     private RestHighLevelClient _restHighLevelClient;
 
@@ -82,6 +100,8 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         commands.add(GetVmLogsCmd.class);
         commands.add(ScrollVmLogsCmd.class);
         commands.add(ListVmLogFilesCmd.class);
+        commands.add(CreateVmLogTokenCmd.class);
+        commands.add(InvalidateVmLogTokenCmd.class);
         return commands;
     }
 
@@ -131,7 +151,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         }
         SearchRequest searchRequest = _vmLogRequestBuilder.getLogSearchRequest(vmInstanceVO.getUuid(), page, pageSize, scroll, start, end, keywords, logFile, sorting);
         try {
-            return _vmLogFetcher.fetch(_restHighLevelClient, searchRequest, VmLogResponse.class);
+            return _vmLogExecutor.fetch(_restHighLevelClient, searchRequest, VmLogResponse.class);
         } catch (Exception e) {
             s_logger.error("Unable to retrieve VM logs", e);
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM logs");
@@ -148,7 +168,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         }
         SearchScrollRequest request = _vmLogRequestBuilder.getScrollRequest(scrollId, timeout);
         try {
-            return _vmLogFetcher.scroll(_restHighLevelClient, request, VmLogResponse.class);
+            return _vmLogExecutor.scroll(_restHighLevelClient, request, VmLogResponse.class);
         } catch (Exception e) {
             s_logger.error("Unable to retrieve VM logs", e);
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM logs");
@@ -174,12 +194,12 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         }
         SearchRequest searchRequest = _vmLogRequestBuilder.getLogFileSearchRequest(vmInstanceVO.getUuid(), pageSize.intValue(), null, start, end);
         try {
-            AggregateResponse<VmLogFileResponse> response = _vmLogFetcher.fetchLogFiles(_restHighLevelClient, searchRequest);
+            AggregateResponse<VmLogFileResponse> response = _vmLogExecutor.fetchLogFiles(_restHighLevelClient, searchRequest);
             if (startIndex < response.getCount()) {
                 long lastIndex = pageSize - 1;
                 while (startIndex > lastIndex && response.getSearchAfter() != null) {
                     searchRequest = _vmLogRequestBuilder.getLogFileSearchRequest(vmInstanceVO.getUuid(), pageSize.intValue(), response.getSearchAfter(), start, end);
-                    response = _vmLogFetcher.fetchLogFiles(_restHighLevelClient, searchRequest);
+                    response = _vmLogExecutor.fetchLogFiles(_restHighLevelClient, searchRequest);
                     lastIndex += pageSize;
                 }
                 if (startIndex <= lastIndex) {
@@ -195,6 +215,54 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
         } catch (Exception e) {
             s_logger.error("Unable to retrieve VM log files", e);
             throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to retrieve VM log files");
+        }
+    }
+
+    @Override
+    public String createToken(Long id) {
+        VMInstanceVO vmInstanceVO = _vmInstanceDao.findById(id);
+        if (vmInstanceVO == null) {
+            throw new InvalidParameterValueException("Unable to find a virtual machine with specified id");
+        }
+        Token token = new Token(_tokenGenerator.generate(), vmInstanceVO.getUuid(), DateUtils.getCurrentDateTime());
+        try {
+            IndexRequest request = _vmLogRequestBuilder.getCreateTokenRequest(token);
+            _vmLogExecutor.index(_restHighLevelClient, request);
+            return token.getToken();
+        } catch (IOException e) {
+            s_logger.error("Unable to create VM log token", e);
+            throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to create VM log token");
+        }
+    }
+
+    @Override
+    public boolean invalidateToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new InvalidParameterValueException("Invalid token");
+        }
+        GetRequest getRequest = _vmLogRequestBuilder.getGetTokenRequest(token);
+        try {
+            Token tokenResult = _vmLogExecutor.get(_restHighLevelClient, getRequest, Token.class);
+            if (tokenResult == null) {
+                throw new InvalidParameterValueException("The token does not exist");
+            }
+            if (tokenResult.getValidTo() != null) {
+                throw new InvalidParameterValueException("Invalid token");
+            }
+            VMInstanceVO vmInstanceVO = null;
+            if (tokenResult.getVmUuid() != null) {
+                vmInstanceVO = _vmInstanceDao.findByUuid(tokenResult.getVmUuid());
+            }
+            if (vmInstanceVO == null) {
+                throw new InvalidParameterValueException("Unable to find a virtual machine for the token");
+            }
+            _accountManager.checkAccess(CallContext.current().getCallingAccount(), SecurityChecker.AccessType.OperateEntry, false, vmInstanceVO);
+            UpdateRequest invalidateRequest = _vmLogRequestBuilder.getInvalidateTokenRequest(token, DateUtils.getCurrentDateTime());
+            _vmLogExecutor.update(_restHighLevelClient, invalidateRequest);
+            return true;
+        } catch (IOException e) {
+            s_logger.error("Unable to invalidate VM log token", e);
+            throw new ServerApiException(ApiErrorCode.INTERNAL_ERROR, "Failed to invalidate VM log token");
         }
     }
 

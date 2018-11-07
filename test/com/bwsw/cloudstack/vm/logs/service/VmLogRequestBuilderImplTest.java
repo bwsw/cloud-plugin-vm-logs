@@ -17,7 +17,9 @@
 
 package com.bwsw.cloudstack.vm.logs.service;
 
+import com.bwsw.cloudstack.vm.logs.entity.EntityConstants;
 import com.bwsw.cloudstack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.entity.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -25,8 +27,11 @@ import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.apache.commons.io.IOUtils;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -43,6 +48,8 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +81,7 @@ public class VmLogRequestBuilderImplTest {
     }
 
     private static final String UUID = "uuid";
+    private static final String TOKEN = "test_token";
     private static final int PAGE_SIZE = 15;
     private static final int PAGE = 1;
     private static final int TIMEOUT = 60000;
@@ -174,6 +182,44 @@ public class VmLogRequestBuilderImplTest {
         SearchRequest searchRequest = _vmLogQueryBuilder.getLogFileSearchRequest(UUID, PAGE_SIZE, AGGREGATE_AFTER, null, null);
 
         checkCommonLogFileQuerySettings(searchRequest, PAGE_SIZE, AGGREGATE_AFTER);
+    }
+
+    @Test
+    public void testCreateTokenRequest() throws IOException {
+        Token token = new Token(TOKEN, UUID, LocalDateTime.now());
+
+        IndexRequest request = _vmLogQueryBuilder.getCreateTokenRequest(token);
+
+        assertNotNull(request);
+        assertEquals(TOKEN, request.id());
+        assertEquals(VmLogRequestBuilder.REGISTRY_INDEX, request.index());
+        assertEquals(VmLogRequestBuilder.REGISTRY_TYPE, request.type());
+        assertEquals(token, s_objectMapper.readValue(request.source().utf8ToString(), Token.class));
+    }
+
+    @Test
+    public void testGetGetTokenRequest() {
+        GetRequest request = _vmLogQueryBuilder.getGetTokenRequest(TOKEN);
+
+        assertNotNull(request);
+        assertEquals(VmLogRequestBuilder.REGISTRY_INDEX, request.index());
+        assertEquals(VmLogRequestBuilder.REGISTRY_TYPE, request.type());
+        assertEquals(TOKEN, request.id());
+    }
+
+    @Test
+    public void testInvalidateTokenRequest() {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Map<String, Object> fields = ImmutableMap.of(EntityConstants.VALID_TO, now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        UpdateRequest request = _vmLogQueryBuilder.getInvalidateTokenRequest(TOKEN, now);
+
+        assertNotNull(request);
+        assertEquals(VmLogRequestBuilder.REGISTRY_INDEX, request.index());
+        assertEquals(VmLogRequestBuilder.REGISTRY_TYPE, request.type());
+        assertEquals(TOKEN, request.id());
+        assertNotNull(request.doc());
+        assertEquals(fields, request.doc().sourceAsMap());
     }
 
     private void checkCommonSearchQuerySettings(SearchRequest searchRequest, int pageSize) {

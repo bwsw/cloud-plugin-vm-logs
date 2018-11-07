@@ -15,16 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.json;
 
-public class EntityConstants {
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
-    public static final String TOKEN = "token";
-    public static final String VM_UUID = "vm_uuid";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+
+    @Override
+    public void serialize(LocalDateTime value, JsonGenerator jsonGenerator, SerializerProvider serializers) throws IOException {
+        jsonGenerator.writeString(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(value));
+    }
 }

@@ -25,5 +25,7 @@
 
     <bean id="vmLogRequestBuilder" class="com.bwsw.cloudstack.vm.logs.service.VmLogRequestBuilderImpl"/>
 
-    <bean id="vmLogFetcher" class="com.bwsw.cloudstack.vm.logs.service.VmLogFetcherImpl"/>
+    <bean id="vmLogExecutor" class="com.bwsw.cloudstack.vm.logs.service.VmLogExecutorImpl"/>
+
+    <bean id="vmLogTokenGenerator" class="com.bwsw.cloudstack.vm.logs.security.TokenGeneratorImpl"/>
 </beans>
