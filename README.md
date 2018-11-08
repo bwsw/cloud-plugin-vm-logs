@@ -81,6 +81,8 @@ If SSL or user authentification are required Elasticsearch output plugin should 
 
 If throttling for VM logs are required Throttle filter plugin should be used (see https://www.elastic.co/guide/en/logstash/6.2/plugins-filters-throttle.html). 
 
+If the token specified in [Filebeat configuration](#filebeat-6.3) is invalid or Elasticsearch is unavailable VM logs will be dropped.
+
 Configuration example:
 
 ```
@@ -90,25 +92,23 @@ input {
   }
 }
 
-# GRANT SELECT on cloud.vm_instance TO logstash@'localhost' IDENTIFIED BY 'xxxxxxxxxx';
-
 filter {
-  jdbc_streaming {
-    jdbc_driver_library => "/usr/share/java/mysql-connector-java-5.1.38.jar"
-    jdbc_driver_class => "com.mysql.jdbc.Driver"
-    jdbc_connection_string => "jdbc:mysql://localhost:3306/cloud"
-    jdbc_user => "logstash"
-    jdbc_password => "xxxxxxxxxx"
-    jdbc_validate_connection => true
-    statement => "select id from vm_instance WHERE uuid = :uuid"
-    parameters => { "uuid" => "vm_uuid"}
-    target => "vm_id"
-    tag_on_failure => ["vm_uuid_failure"]
-    tag_on_default_use => ["vm_uuid_unknown"]
+  elasticsearch {
+    hosts => "localhost:9200"
+    index => "vmlog-registry"
+    ssl => false
+    tag_on_failure => ["token_failure"]
+    fields => {
+      "vm_uuid" => "vm_uuid"
+    }
+    query_template => "/usr/share/logstash/config/vmlog-registry-query-template.json"
   }
-  if "vm_uuid_unknown" in [tags] and "vm_uuid_failure" not in [tags] {
+  if ![vm_uuid] {
     drop {
     }
+  }
+  mutate {
+    remove_field => ["token"]
   }
 }
 
@@ -119,7 +119,6 @@ output {
     ssl => false
   }
 }
-
 ```
 
 ## Filebeat 6.3
@@ -133,7 +132,7 @@ Filebeat should be used in virtual machines for log processing.
 
 The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.3/index.html
 
-Filebeat configuration should contain a field *vm_uuid* that is the ID of the virtual machine, *fields_under_root* equal to true and Logstash output.
+Filebeat configuration should contain a field `token` that is the token obtained via CloudStack (see [createVmLogToken](#createvmlogtoken)), *fields_under_root* equal to true and Logstash output.
 
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
@@ -159,6 +158,8 @@ The plugin provides following API commands to view virtual machine logs:
 * [listVmLogFiles](#listvmlogfiles)
 * [getVmLogs](#getvmlogs)
 * [scrollVmLogs](#scrollvmlogs)
+* [createVmLogToken](#createvmlogtoken)
+* [invalidateVmLogToken](#invalidatevmlogtoken)
 
 ## Commands
 
@@ -223,6 +224,38 @@ Retrieves next batch of logs for the virtual machine.
 **Response tags**
 
 See [VM log response tags](#vm-log-response-tags).
+
+### createVmLogToken
+
+Creates a token to publish VM logs.
+
+**Request parameters**
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| id | the ID of the virtual machine | true |
+
+**Response tags**
+
+| Response Name | Description |
+| -------------- | ---------- |
+| vmlogtoken | the token response |
+| &nbsp;&nbsp;&nbsp;&nbsp;token | the token |
+
+### invalidateVmLogToken
+
+**Request parameters**
+
+| Parameter Name | Description | Required |
+| -------------- | ----------- | -------- |
+| token | the token to publish VM logs | true |
+
+**Response tags**
+
+| Response Name | Description |
+| -------------- | ---------- |
+| vmlogtokenresult | success response |
+| &nbsp;&nbsp;&nbsp;&nbsp;success | true if the token |
 
 ## Response tags
 
