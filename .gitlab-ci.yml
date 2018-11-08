@@ -1,4 +1,4 @@
-image: maven:3.5.4
+image: maven:3.5.3
 
 stages:
   - prepare
