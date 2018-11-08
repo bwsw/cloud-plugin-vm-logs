@@ -32,6 +32,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -51,6 +52,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -220,6 +222,17 @@ public class VmLogRequestBuilderImplTest {
         assertEquals(TOKEN, request.id());
         assertNotNull(request.doc());
         assertEquals(fields, request.doc().sourceAsMap());
+    }
+
+    @Test
+    public void testGetLogIndicesStatsRequest() {
+        Request request = _vmLogQueryBuilder.getLogIndicesStatsRequest();
+
+        assertNotNull(request);
+        assertEquals("GET", request.getMethod());
+        assertEquals("vmlog-*-*/_stats/store", request.getEndpoint());
+        assertEquals(Collections.emptyMap(), request.getParameters());
+        assertNull(request.getEntity());
     }
 
     private void checkCommonSearchQuerySettings(SearchRequest searchRequest, int pageSize) {

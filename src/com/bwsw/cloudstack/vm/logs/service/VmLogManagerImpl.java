@@ -35,8 +35,11 @@ import com.bwsw.cloudstack.vm.logs.util.HttpUtils;
 import com.cloud.exception.InvalidParameterValueException;
 import com.cloud.user.AccountManager;
 import com.cloud.utils.component.ComponentLifecycleBase;
+import com.cloud.utils.exception.CloudRuntimeException;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.cloudstack.acl.SecurityChecker;
 import org.apache.cloudstack.api.ApiErrorCode;
@@ -50,24 +53,32 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.rest.RestStatus;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogManager, Configurable {
@@ -76,6 +87,7 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     private static final Map<String, String> s_logFields = ImmutableMap
             .of(EntityConstants.TIMESTAMP, VmLogRequestBuilder.DATE_FIELD, EntityConstants.FILE, VmLogRequestBuilder.LOG_FILE_SORT_FIELD, EntityConstants.LOG,
                     VmLogRequestBuilder.DATA_SORT_FIELD);
+    private static final Pattern s_indexPattern = Pattern.compile("vmlog-(.+)-[0-9]{4}-[0-9]{2}-[0-9]{2}");
 
     @Inject
     private VMInstanceDao _vmInstanceDao;
@@ -93,6 +105,8 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     private AccountManager _accountManager;
 
     private RestHighLevelClient _restHighLevelClient;
+
+    private ObjectMapper _objectMapper = new ObjectMapper();
 
     @Override
     public List<Class<?>> getCommands() {
@@ -267,6 +281,48 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
     }
 
     @Override
+    public Map<String, Double> getVmLogStats() {
+        Request request = _vmLogRequestBuilder.getLogIndicesStatsRequest();
+        try {
+            Response response = _vmLogExecutor.execute(_restHighLevelClient, request);
+            if (response.getStatusLine().getStatusCode() != RestStatus.OK.getStatus()) {
+                throw new CloudRuntimeException("Unexpected status for VM log index stats " + response.getStatusLine().getStatusCode());
+            }
+            JsonNode result = _objectMapper.readTree(EntityUtils.toString(response.getEntity()));
+            if (result != null) {
+                JsonNode data = result.path("indices");
+                if (data.isMissingNode()) {
+                    throw getInvalidStatsException();
+                }
+                Map<String, Double> stats = new HashMap<>();
+                Iterator<Map.Entry<String, JsonNode>> indices = data.fields();
+                while (indices.hasNext()) {
+                    Map.Entry<String, JsonNode> index = indices.next();
+                    Matcher vmUuidMatcher = s_indexPattern.matcher(index.getKey());
+                    if (vmUuidMatcher.matches() && !index.getValue().isNull()) {
+                        String vmUuid = vmUuidMatcher.group(1);
+                        JsonNode indexSize = index.getValue().path("total").path("store").path("size_in_bytes");
+                        if (!indexSize.isMissingNode()) {
+                            stats.merge(vmUuid, indexSize.doubleValue(), (total, current) -> total + current);
+                        } else {
+                            throw getInvalidStatsException();
+                        }
+                    }
+                }
+                // size in MB
+                stats.replaceAll((k, v) -> v / (1024 * 1024));
+                return stats;
+            } else {
+                throw getInvalidStatsException();
+            }
+        } catch (CloudRuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CloudRuntimeException("Unable to retrieve VM log index stats", e);
+        }
+    }
+
+    @Override
     public boolean configure(String name, Map<String, Object> params) {
         try {
             RestClientBuilder restClientBuilder = RestClient.builder(HttpUtils.getHttpHosts(VmLogElasticsearchList.value()).toArray(new HttpHost[] {}));
@@ -291,7 +347,11 @@ public class VmLogManagerImpl extends ComponentLifecycleBase implements VmLogMan
 
     @Override
     public ConfigKey<?>[] getConfigKeys() {
-        return new ConfigKey<?>[] {VmLogElasticsearchList, VmLogElasticsearchUsername, VmLogElasticsearchPassword, VmLogDefaultPageSize};
+        return new ConfigKey<?>[] {VmLogElasticsearchList, VmLogElasticsearchUsername, VmLogElasticsearchPassword, VmLogDefaultPageSize, VmLogUsageTimeout};
+    }
+
+    private CloudRuntimeException getInvalidStatsException() {
+        return new CloudRuntimeException("Invalid VM log index stats response");
     }
 
 }

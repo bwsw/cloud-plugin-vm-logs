@@ -25,6 +25,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,4 +56,6 @@ public interface VmLogRequestBuilder {
     GetRequest getGetTokenRequest(String token);
 
     UpdateRequest getInvalidateTokenRequest(String token, LocalDateTime validTo);
+
+    Request getLogIndicesStatsRequest();
 }

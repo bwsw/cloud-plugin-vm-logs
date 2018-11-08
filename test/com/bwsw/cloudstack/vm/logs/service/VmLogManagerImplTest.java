@@ -31,18 +31,27 @@ import com.cloud.exception.PermissionDeniedException;
 import com.cloud.user.Account;
 import com.cloud.user.AccountManager;
 import com.cloud.user.User;
+import com.cloud.utils.exception.CloudRuntimeException;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.cloudstack.acl.SecurityChecker;
 import org.apache.cloudstack.api.ServerApiException;
 import org.apache.cloudstack.api.response.ListResponse;
 import org.apache.cloudstack.context.CallContext;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicStatusLine;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.hamcrest.CustomMatcher;
 import org.junit.AfterClass;
@@ -56,8 +65,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -123,6 +134,9 @@ public class VmLogManagerImplTest {
     private UpdateRequest _updateRequest;
 
     @Mock
+    private Response _response;
+
+    @Mock
     private VMInstanceVO _vmInstanceVO;
 
     @Mock
@@ -137,6 +151,8 @@ public class VmLogManagerImplTest {
     private ScrollableListResponse<VmLogResponse> _emptyVmLogResponse = new ScrollableListResponse<>(0, null, SCROLL_ID);
 
     private SearchRequest _searchRequest = new SearchRequest();
+
+    private Request _request = new Request("GET", "http://localhost:9200/_stats/vmlog-*-*/store", Collections.emptyMap(), null);
 
     @BeforeClass
     public static void beforeClass() {
@@ -523,6 +539,73 @@ public class VmLogManagerImplTest {
         boolean result = _vmLogManager.invalidateToken(TOKEN_ENTITY.getToken());
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testGetVmLogStatsRequestException() throws IOException {
+        setExceptionExpectation(CloudRuntimeException.class, "VM log index stats");
+
+        when(_vmLogRequestBuilder.getLogIndicesStatsRequest()).thenReturn(_request);
+        when(_vmLogExecutor.execute(_restHighLevelClient, _request)).thenThrow(new IOException());
+
+        _vmLogManager.getVmLogStats();
+    }
+
+    @Test
+    public void testGetVmLogStatsInvalidResponseStatus() throws IOException {
+        setExceptionExpectation(CloudRuntimeException.class, "VM log index stats");
+
+        when(_vmLogRequestBuilder.getLogIndicesStatsRequest()).thenReturn(_request);
+        when(_vmLogExecutor.execute(_restHighLevelClient, _request)).thenReturn(_response);
+        when(_response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+
+        _vmLogManager.getVmLogStats();
+    }
+
+    @Test
+    public void testGetVmLogStatsInvalidJson() throws IOException {
+        testGetVmLogStatsInvalidResponse("invalid");
+    }
+
+    @Test
+    public void testGetVmLogStatsInvalidContent() throws IOException {
+        testGetVmLogStatsInvalidResponse(getResource("invalid-stats-response.json"));
+    }
+
+    @Test
+    public void testGetVmLogStatsEmptyStats() throws IOException {
+        testGetVmLogStats(getResource("empty-stats-response.json"), Collections.emptyMap());
+    }
+
+    @Test
+    public void testGetVmLogStats() throws IOException {
+        testGetVmLogStats(getResource("valid-stats-response.json"), ImmutableMap.of("11207fa9-8cce-481f-a210-016b30d161f4", 0.8431110382080078));
+    }
+
+    private void testGetVmLogStatsInvalidResponse(String response) throws IOException {
+        setExceptionExpectation(CloudRuntimeException.class, "VM log index stats");
+
+        when(_vmLogRequestBuilder.getLogIndicesStatsRequest()).thenReturn(_request);
+        when(_vmLogExecutor.execute(_restHighLevelClient, _request)).thenReturn(_response);
+        when(_response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null));
+        when((_response.getEntity())).thenReturn(new StringEntity(response));
+
+        _vmLogManager.getVmLogStats();
+    }
+
+    private void testGetVmLogStats(String response, Map<String, Double> stats) throws IOException {
+        when(_vmLogRequestBuilder.getLogIndicesStatsRequest()).thenReturn(_request);
+        when(_vmLogExecutor.execute(_restHighLevelClient, _request)).thenReturn(_response);
+        when(_response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null));
+        when((_response.getEntity())).thenReturn(new StringEntity(response));
+
+        Map<String, Double> result = _vmLogManager.getVmLogStats();
+
+        assertEquals(stats, result);
+    }
+
+    private String getResource(String resource) throws IOException {
+        return IOUtils.resourceToString(resource, Charset.defaultCharset(), this.getClass().getClassLoader());
     }
 
     private void setExceptionExpectation(Class<? extends Exception> exceptionClass, String message) {

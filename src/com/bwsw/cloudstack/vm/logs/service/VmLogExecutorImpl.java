@@ -32,6 +32,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
@@ -119,6 +121,11 @@ public class VmLogExecutorImpl implements VmLogExecutor {
         if (response.status() != RestStatus.OK) {
             throw new CloudRuntimeException("Failed to execute update operation");
         }
+    }
+
+    @Override
+    public Response execute(RestHighLevelClient client, Request request) throws IOException {
+        return client.getLowLevelClient().performRequest(request.getMethod(), request.getEndpoint(), request.getParameters(), request.getEntity());
     }
 
     private <T extends ResponseEntity> List<T> parseResults(SearchResponse response, Class<T> elementClass) throws IOException {
