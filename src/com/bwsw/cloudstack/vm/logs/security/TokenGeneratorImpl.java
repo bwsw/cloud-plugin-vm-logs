@@ -15,16 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.security;
 
-public class EntityConstants {
+import org.apache.commons.codec.binary.Base64;
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
-    public static final String TOKEN = "token";
-    public static final String VM_UUID = "vm_uuid";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
+import javax.crypto.KeyGenerator;
+import java.security.NoSuchAlgorithmException;
+
+public class TokenGeneratorImpl implements TokenGenerator {
+
+    private final KeyGenerator generator;
+
+    public TokenGeneratorImpl() throws NoSuchAlgorithmException {
+        this.generator = KeyGenerator.getInstance("HmacSHA1");
+    }
+
+    @Override
+    public String generate() {
+        return Base64.encodeBase64URLSafeString(generator.generateKey().getEncoded());
+    }
 }

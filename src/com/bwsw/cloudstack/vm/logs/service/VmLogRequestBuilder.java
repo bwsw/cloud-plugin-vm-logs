@@ -18,8 +18,13 @@
 package com.bwsw.cloudstack.vm.logs.service;
 
 import com.bwsw.cloudstack.vm.logs.entity.SortField;
+import com.bwsw.cloudstack.vm.logs.entity.Token;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +40,8 @@ public interface VmLogRequestBuilder {
     String DATA_SEARCH_FIELD = "message.search";
     String LOG_FILE_AGGREGATION = "logfiles";
     String LOG_FILE_COUNT_AGGREGATION = "count_logfiles";
+    String REGISTRY_INDEX = "vmlog-registry";
+    String REGISTRY_TYPE = "_doc";
 
     SearchRequest getLogSearchRequest(String vmUuid, int page, int pageSize, Integer timeout, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile,
             List<SortField> sortFields);
@@ -42,4 +49,10 @@ public interface VmLogRequestBuilder {
     SearchScrollRequest getScrollRequest(String scrollId, int scrollTimeout);
 
     SearchRequest getLogFileSearchRequest(String vmUuid, int pageSize, Map<String, Object> aggregateAfter, LocalDateTime start, LocalDateTime end);
+
+    IndexRequest getCreateTokenRequest(Token token) throws JsonProcessingException;
+
+    GetRequest getGetTokenRequest(String token);
+
+    UpdateRequest getInvalidateTokenRequest(String token, LocalDateTime validTo);
 }

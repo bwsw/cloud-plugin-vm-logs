@@ -15,16 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.response;
 
-public class EntityConstants {
+import com.google.gson.annotations.SerializedName;
+import org.apache.cloudstack.api.BaseResponse;
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
-    public static final String TOKEN = "token";
-    public static final String VM_UUID = "vm_uuid";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
+public class TokenResponse extends BaseResponse {
+
+    @SerializedName("token")
+    private String token;
+
+    public TokenResponse() {
+        super("vmlogtoken");
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 }

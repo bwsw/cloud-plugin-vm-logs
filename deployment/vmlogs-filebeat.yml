@@ -63,7 +63,7 @@ filebeat:
       # Optional additional fields. These field can be freely picked
       # to add additional information to the crawled log files for filtering
       fields:
-        vm_uuid: "61d12f36-0201-4035-b6fc-c7f768f583f1"
+        token: "ExHh0YBxjzY_vgKyvAy2bYk_2Z7o8paaNJ_9uGYZ3RCY6slpLMTXioWTnqsfdIZ5r9ZWiD8JvEwqfzOns5fmkQ"
         #level: debug
         #review: 1
 
