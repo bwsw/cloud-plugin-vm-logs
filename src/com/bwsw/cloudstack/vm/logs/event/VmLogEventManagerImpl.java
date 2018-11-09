@@ -19,7 +19,6 @@ package com.bwsw.cloudstack.vm.logs.event;
 
 import com.bwsw.cloudstack.vm.logs.service.VmLogManager;
 import com.cloud.event.EventCategory;
-import com.cloud.server.ManagementService;
 import com.cloud.utils.component.ComponentLifecycleBase;
 import com.cloud.vm.VirtualMachine;
 import org.apache.cloudstack.framework.events.Event;
@@ -68,7 +67,7 @@ public class VmLogEventManagerImpl extends ComponentLifecycleBase implements VmL
 
     @Override
     public void publishVmLogStats(Map<String, Double> stats) throws EventBusException {
-        Event event = new Event(ManagementService.Name, EventCategory.USAGE_EVENT.getName(), EventTypes.EVENT_VM_LOG_STATS, VirtualMachine.class.getSimpleName(), null);
+        Event event = new Event(EVENT_SOURCE, EventCategory.USAGE_EVENT.getName(), EventTypes.EVENT_VM_LOG_STATS, VirtualMachine.class.getSimpleName(), null);
         Map<String, Object> details = new HashMap<>();
         String eventDate = new SimpleDateFormat(EVENT_DATE_FORMAT).format(new Date());
         details.put(EVENT_DATE_TIME, eventDate);

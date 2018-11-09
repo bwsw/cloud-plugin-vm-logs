@@ -19,7 +19,6 @@ package com.bwsw.cloudstack.vm.logs.event;
 
 import com.bwsw.cloudstack.vm.logs.service.VmLogManager;
 import com.cloud.event.EventCategory;
-import com.cloud.server.ManagementService;
 import com.cloud.vm.VirtualMachine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -106,7 +105,7 @@ public class VmLogEventManagerImplTest {
                     return false;
                 }
                 // check other event fields
-                return ManagementService.Name.equals(event.getEventSource()) && EventCategory.USAGE_EVENT.getName().equals(event.getEventCategory())
+                return VmLogEventManager.EVENT_SOURCE.equals(event.getEventSource()) && EventCategory.USAGE_EVENT.getName().equals(event.getEventCategory())
                         && EventTypes.EVENT_VM_LOG_STATS.equals(event.getEventType()) && VirtualMachine.class.getSimpleName().equals(event.getResourceType())
                         && event.getResourceUUID() == null;
             }

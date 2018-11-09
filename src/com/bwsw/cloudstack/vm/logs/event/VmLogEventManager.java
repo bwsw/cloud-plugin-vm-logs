@@ -24,6 +24,7 @@ import java.util.Map;
 public interface VmLogEventManager {
 
     String EVENT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
+    String EVENT_SOURCE = "vm-logs";
     String EVENT_DATE_TIME = "eventDateTime";
     String STATS = "stats";
 
