@@ -4,7 +4,7 @@ BRANCH=$1
 
 git submodule update --init --recursive
 cd cloudstack
-git checkout -b $BRANCH
+git checkout -b $BRANCH || git checkout $BRANCH
 git branch --set-upstream-to=origin/$BRANCH $BRANCH
 git reset --hard origin/$BRANCH
 git pull
