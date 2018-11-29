@@ -3,7 +3,6 @@ image: maven:3.5.3
 stages:
   - prepare
   - build
-  - test
   - deploy
   - mirror
 
@@ -35,15 +34,7 @@ prepare:
 build:
   stage: build
   script:
-    - mvn $MAVEN_CLI_OPTS clean compile
-  tags:
-    - build-in-docker
-    - cs-eco-builder
-
-test:
-  stage: test
-  script:
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn $MAVEN_CLI_OPTS clean compile test
   tags:
     - build-in-docker
     - cs-eco-builder
