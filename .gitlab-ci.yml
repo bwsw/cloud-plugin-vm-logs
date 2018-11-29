@@ -12,7 +12,7 @@ variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml"
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
   GIT_SUBMODULE_STRATEGY: recursive
-  CLOUDSTACK_VERSION: "4.11.1.0"
+  CLOUDSTACK_VERSION: "4.11.2.0"
   UPSTREAM_REPOSITORY: "git@github.com:bwsw/cloud-plugin-vm-logs.git"
   UPSTREAM_BRANCH: "master"
 
