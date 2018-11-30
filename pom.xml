@@ -23,7 +23,7 @@
 
     <groupId>com.bwsw</groupId>
     <artifactId>cloud-plugin-vm-logs</artifactId>
-    <version>4.11.1.0-SNAPSHOT</version>
+    <version>4.11.2.0-SNAPSHOT</version>
     <name>Apache CloudStack Plugin - VM logs</name>
     <description>API plugin for Apache CloudStack to process and view virtual machine logs</description>
     <url>https://git.bw-sw.com/cloudstack-ecosystem/cloud-plugin-vm-logs</url>
@@ -56,7 +56,7 @@
     </scm>
 
     <properties>
-        <cloudstack.version>4.11.1.0</cloudstack.version>
+        <cloudstack.version>4.11.2.0</cloudstack.version>
         <elasticsearch.version>6.2.4</elasticsearch.version>
         <jackson.version>2.9.2</jackson.version>
     </properties>
