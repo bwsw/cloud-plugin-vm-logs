@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "number_of_replicas": 2
+  },
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "token": {
+          "type": "keyword"
+        },
+        "vm_uuid": {
+          "type": "keyword"
+        },
+        "valid_from": {
+          "type": "date"
+        },
+        "valid_to": {
+          "type": "date"
+        }
+      }
+    }
+  }
+}

@@ -23,9 +23,17 @@ import com.bwsw.cloudstack.vm.logs.response.ScrollableListResponse;
 import com.bwsw.cloudstack.vm.logs.response.VmLogFileResponse;
 import com.cloud.utils.exception.CloudRuntimeException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
@@ -40,7 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VmLogFetcherImpl implements VmLogFetcher {
+public class VmLogExecutorImpl implements VmLogExecutor {
 
     private final ObjectMapper _objectMapper = new ObjectMapper();
 
@@ -88,6 +96,36 @@ public class VmLogFetcherImpl implements VmLogFetcher {
         }
 
         return new AggregateResponse<>(responses, (int)((Cardinality)countAggregation).getValue(), compositeAggregation.afterKey());
+    }
+
+    @Override
+    public void index(RestHighLevelClient client, IndexRequest request) throws IOException {
+        IndexResponse response = client.index(request);
+        if (response.status() != RestStatus.CREATED) {
+            throw new CloudRuntimeException("Failed to execute create operation");
+        }
+    }
+
+    @Override
+    public <T> T get(RestHighLevelClient client, GetRequest request, Class<T> entityClass) throws IOException {
+        GetResponse response = client.get(request);
+        if (response.isExists() && !response.isSourceEmpty()) {
+            return _objectMapper.readValue(response.getSourceAsString(), entityClass);
+        }
+        return null;
+    }
+
+    @Override
+    public void update(RestHighLevelClient client, UpdateRequest request) throws IOException {
+        UpdateResponse response = client.update(request);
+        if (response.status() != RestStatus.OK) {
+            throw new CloudRuntimeException("Failed to execute update operation");
+        }
+    }
+
+    @Override
+    public Response execute(RestHighLevelClient client, Request request) throws IOException {
+        return client.getLowLevelClient().performRequest(request.getMethod(), request.getEndpoint(), request.getParameters(), request.getEntity());
     }
 
     private <T extends ResponseEntity> List<T> parseResults(SearchResponse response, Class<T> elementClass) throws IOException {

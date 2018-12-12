@@ -15,16 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.event;
 
-public class EntityConstants {
+public class EventTypes {
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
-    public static final String TOKEN = "token";
-    public static final String VM_UUID = "vm_uuid";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
+    public static final String EVENT_VM_LOG_STATS = "VM.LOG.STATS";
+
 }

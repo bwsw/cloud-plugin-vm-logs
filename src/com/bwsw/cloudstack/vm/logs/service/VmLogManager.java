@@ -26,6 +26,7 @@ import org.apache.cloudstack.framework.config.ConfigKey;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface VmLogManager extends PluggableService {
 
@@ -40,10 +41,18 @@ public interface VmLogManager extends PluggableService {
 
     ConfigKey<Integer> VmLogDefaultPageSize = new ConfigKey<>("Advanced", Integer.class, "vm.log.page.size.default", "100", "Default page size for VM log listing", true);
 
+    ConfigKey<Integer> VmLogUsageTimeout = new ConfigKey<>("Advanced", Integer.class, "vm.log.usage.timeout", "3600", "Timeout in seconds to send VM log statistics", false);
+
     ScrollableListResponse<VmLogResponse> listVmLogs(Long id, LocalDateTime start, LocalDateTime end, List<String> keywords, String logFile, List<String> sortFields, Integer page,
             Integer pageSize, Integer scroll);
 
     ScrollableListResponse<VmLogResponse> scrollVmLogs(String scrollId, Integer timeout);
 
     ListResponse<VmLogFileResponse> listVmLogFiles(Long id, LocalDateTime start, LocalDateTime end, Long startIndex, Long pageSize);
+
+    String createToken(Long id);
+
+    boolean invalidateToken(String token);
+
+    Map<String, Double> getVmLogStats();
 }

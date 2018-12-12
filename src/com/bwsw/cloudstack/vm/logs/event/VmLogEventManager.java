@@ -15,16 +15,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package com.bwsw.cloudstack.vm.logs.entity;
+package com.bwsw.cloudstack.vm.logs.event;
 
-public class EntityConstants {
+import org.apache.cloudstack.framework.events.EventBusException;
 
-    public static final String ID = "id";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String FILE = "file";
-    public static final String LOG = "log";
-    public static final String TOKEN = "token";
-    public static final String VM_UUID = "vm_uuid";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
+import java.util.Map;
+
+public interface VmLogEventManager {
+
+    String EVENT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
+    String EVENT_SOURCE = "vm-logs";
+    String EVENT_DATE_TIME = "eventDateTime";
+    String STATS = "stats";
+
+    void publishVmLogStats(Map<String, Double> stats) throws EventBusException;
+
 }
