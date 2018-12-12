@@ -26,6 +26,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.IOException;
@@ -43,4 +45,6 @@ public interface VmLogExecutor {
     <T> T get(RestHighLevelClient client, GetRequest request, Class<T> elementClass) throws IOException;
 
     void update(RestHighLevelClient client, UpdateRequest request) throws IOException;
+
+    Response execute(RestHighLevelClient client, Request request) throws IOException;
 }

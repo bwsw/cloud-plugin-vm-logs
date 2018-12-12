@@ -30,6 +30,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -53,6 +54,7 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
 
     private static final String INDEX_PREFIX = "vmlog-";
     private static final String INDEX_SUFFIX = "-*";
+    private static final String INDEX_PATTERN = "vmlog-*-*";
     private static final String[] FIELDS = new String[] {LOG_FILE_FIELD, DATA_FIELD, DATE_FIELD};
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String LOG_FILE_KEYWORD_FIELD = LOG_FILE_FIELD + ".keyword";
@@ -166,6 +168,11 @@ public class VmLogRequestBuilderImpl implements VmLogRequestBuilder {
         UpdateRequest request = new UpdateRequest(REGISTRY_INDEX, REGISTRY_TYPE, token);
         request.doc(fields);
         return request;
+    }
+
+    @Override
+    public Request getLogIndicesStatsRequest() {
+        return new Request("GET", INDEX_PATTERN + "/_stats/store", Collections.emptyMap(), null);
     }
 
     private String getIndex(String vmUuid) {

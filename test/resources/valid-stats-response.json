@@ -1,0 +1,46 @@
+{
+  "_shards": {
+    "total": 110,
+    "successful": 45,
+    "failed": 0
+  },
+  "_all": {
+    "primaries": {
+      "store": {
+        "size_in_bytes": 2137323
+      }
+    },
+    "total": {
+      "store": {
+        "size_in_bytes": 2137323
+      }
+    }
+  },
+  "indices": {
+    "vmlog-11207fa9-8cce-481f-a210-016b30d161f4-2018-10-29": {
+      "primaries": {
+        "store": {
+          "size_in_bytes": 690030
+        }
+      },
+      "total": {
+        "store": {
+          "size_in_bytes": 690030
+        }
+      }
+    },
+    "vmlog-11207fa9-8cce-481f-a210-016b30d161f4-2018-11-07": {
+      "primaries": {
+        "store": {
+          "size_in_bytes": 194036
+        }
+      },
+      "total": {
+        "store": {
+          "size_in_bytes": 194036
+        }
+      }
+    }
+  }
+}
+
