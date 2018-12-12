@@ -71,10 +71,6 @@ In the template above following placeholders should be replaced with real values
 | Name | Description |
 | -------------- | ---------- |
 | %PORT% | the port to process incoming beats from virtual machines |
-| %JDBC_DRIVER_PATH% | the path to JDBC driver library |
-| %JDBC_URL% | JDBC connection URL for Apache CloudStack database |
-| %JDBC_USER% | the user for Apache CloudStack database |
-| %JDBC_PASSWORD% | the user's password for Apache CloudStack database |
 | %ELASTICSEARCH_HOSTS% | Elasticsearch hosts to store VM logs |
 | %VMLOG_REGISTRY_QUERY_TEMPLATE% | file path to [Elasticsearch query template](deployment/vmlog-registry-query-template.json) | 
 
