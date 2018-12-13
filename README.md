@@ -90,6 +90,14 @@ input {
 }
 
 filter {
+  if [vm_uuid] {
+    drop {
+    }
+  }
+  if ![token] {
+    drop {
+    }
+  }
   elasticsearch {
     hosts => "localhost:9200"
     index => "vmlog-registry"
