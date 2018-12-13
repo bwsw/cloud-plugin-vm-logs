@@ -131,6 +131,8 @@ The official documentation can be found at https://www.elastic.co/guide/en/beats
 
 Filebeat configuration should contain a field `token` that is the token obtained via CloudStack (see [createVmLogToken](#createvmlogtoken)), *fields_under_root* equal to true and Logstash output.
 
+Filebeat configuration must not contain a field `vm_uuid` otherwise VM logs will be dropped.
+
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
 ## Curator 5.5
