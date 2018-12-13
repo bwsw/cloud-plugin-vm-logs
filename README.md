@@ -90,6 +90,14 @@ input {
 }
 
 filter {
+  if [vm_uuid] {
+    drop {
+    }
+  }
+  if ![token] {
+    drop {
+    }
+  }
   elasticsearch {
     hosts => "localhost:9200"
     index => "vmlog-registry"
@@ -130,6 +138,8 @@ Filebeat should be used in virtual machines for log processing.
 The official documentation can be found at https://www.elastic.co/guide/en/beats/filebeat/6.3/index.html
 
 Filebeat configuration should contain a field `token` that is the token obtained via CloudStack (see [createVmLogToken](#createvmlogtoken)), *fields_under_root* equal to true and Logstash output.
+
+Filebeat configuration must not contain a field `vm_uuid` otherwise VM logs will be dropped.
 
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
