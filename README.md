@@ -40,7 +40,7 @@ service cloudstack-management start
 
 Following components should be deployed:
 
-## ElasticSearch 6.2.4
+## ElasticSearch
 
 ```
 Version recommended: 6.2.4
@@ -56,7 +56,7 @@ Once ElasticSearch is deployed following actions must be done:
 If customization for _log_ and _file_ tags in responses for [getVmLogs](#getvmlogs) command is required a new template based on _VM log template_ for an index pattern
 *vmlog-** with an adjusted mapping for _message_ and _source_ properties correspondingly should be created.
 
-## Logstash 6.3
+## Logstash
 
 ```
 Version recommended: 6.3.2
@@ -126,7 +126,7 @@ output {
 }
 ```
 
-## Filebeat 6.3
+## Filebeat
 
 ```
 Version recommended: 6.3.2
@@ -143,7 +143,11 @@ Filebeat configuration must not contain a field `vm_uuid` otherwise VM logs will
 
 A configuration example can be find [here](deployment/vmlogs-filebeat.yml).
 
-## Curator 5.5
+## Curator
+
+```
+Version recommended: 5.5.2
+```
 
 Curator is used to delete old virtual machine logs.
 
